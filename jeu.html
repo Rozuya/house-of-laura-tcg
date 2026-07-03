@@ -40,25 +40,26 @@
 
         <div id="combat-log">En attente du début du match...</div>
 
-        <!-- Grille des compétences -->
         <div class="action-grid" id="action-buttons">
             <button onclick="executeAction('basic')" id="btn-basic">
                 ⚔️ Attaque Basique <span class="cooldown-text">Dégâts modérés</span>
             </button>
-            <button onclick="executeAction('briseDef')" id="btn-briseDef">
-                🛡️ Brise-Armure <span class="cooldown-text" id="cd-briseDef">Réduit la Def (2 tours)</span>
-            </button>
-            <button onclick="executeAction('stun')" id="btn-stun">
-                🔨 Ban Chat <span class="cooldown-text" id="cd-stun">Étourdit l'ennemi (1 tour)</span>
-            </button>
-            <button onclick="executeAction('antiHeal')" id="btn-antiHeal">
-                ☠️ Toxicité <span class="cooldown-text" id="cd-antiHeal">Bloque le soin adverse (2 tours)</span>
-            </button>
             <button onclick="executeAction('smallHeal')" id="btn-smallHeal">
                 💊 Snack Rapide <span class="cooldown-text">Petit soin constant</span>
             </button>
+            
+            <button onclick="executeAction('briseDef')" id="btn-briseDef">
+                🛡️ Brise-Armure <span class="cooldown-text" id="cd-briseDef">Réduit la Def (2T)</span>
+            </button>
             <button onclick="executeAction('bigHeal')" id="btn-bigHeal">
-                🚑 Trousse de Secours <span class="cooldown-text" id="cd-bigHeal">Gros soin</span>
+                🚑 Trousse Secours <span class="cooldown-text" id="cd-bigHeal">Gros soin</span>
+            </button>
+
+            <button onclick="executeAction('stun')" id="btn-stun">
+                🔨 Ban Chat <span class="cooldown-text" id="cd-stun">Étourdit l'ennemi (1T)</span>
+            </button>
+            <button onclick="executeAction('antiHeal')" id="btn-antiHeal">
+                ☠️ Toxicité <span class="cooldown-text" id="cd-antiHeal">Bloque le soin adverse (2T)</span>
             </button>
         </div>
 
@@ -72,7 +73,6 @@
         let isPlayerTurn = true;
         let gameActive = true;
 
-        // Structure d'un combattant
         class Fighter {
             constructor(name, maxHp, isPlayer) {
                 this.name = name;
@@ -80,19 +80,15 @@
                 this.hp = maxHp;
                 this.isPlayer = isPlayer;
                 
-                // Altérations d'état (nombre de tours restants)
                 this.defDebuffTurns = 0;
                 this.stunTurns = 0;
                 this.antiHealTurns = 0;
-                
-                // Temps de recharge des compétences
                 this.cooldowns = { briseDef: 0, stun: 0, antiHeal: 0, bigHeal: 0 };
             }
         }
 
         let player, enemy;
 
-        // Écran de sélection
         const rosterDiv = document.getElementById('roster');
         characters.forEach(char => {
             let div = document.createElement('div');
@@ -106,7 +102,6 @@
             let remainingChars = characters.filter(c => c !== selectedChar);
             let enemyName = remainingChars[Math.floor(Math.random() * remainingChars.length)];
 
-            // Stats selon difficulté
             let pMaxHp = 150, eMaxHp = 150;
             if (difficulty === 'facile') { pMaxHp = 200; eMaxHp = 100; }
             if (difficulty === 'difficile') { pMaxHp = 150; eMaxHp = 220; }
@@ -123,6 +118,17 @@
             document.getElementById('player-maxhp-text').innerText = player.maxHp;
             document.getElementById('enemy-maxhp-text').innerText = enemy.maxHp;
 
+            // ADAPTATION DE L'INTERFACE SELON LA DIFFICULTÉ
+            if (difficulty === 'facile') {
+                document.getElementById('btn-briseDef').style.display = 'none';
+                document.getElementById('btn-bigHeal').style.display = 'none';
+                document.getElementById('btn-stun').style.display = 'none';
+                document.getElementById('btn-antiHeal').style.display = 'none';
+            } else if (difficulty === 'normal') {
+                document.getElementById('btn-stun').style.display = 'none';
+                document.getElementById('btn-antiHeal').style.display = 'none';
+            }
+
             updateUI();
             log(`🔥 Le combat commence ! ${player.name} VS ${enemy.name}`);
         }
@@ -133,7 +139,6 @@
         }
 
         function updateUI() {
-            // Mise à jour des HP
             document.getElementById('player-hp-text').innerText = player.hp;
             document.getElementById('enemy-hp-text').innerText = enemy.hp;
             document.getElementById('player-hp-bar').style.width = (player.hp / player.maxHp * 100) + "%";
@@ -141,19 +146,17 @@
             document.getElementById('player-hp-bar').style.background = (player.hp < player.maxHp * 0.3) ? 'var(--danger)' : 'var(--success)';
             document.getElementById('enemy-hp-bar').style.background = (enemy.hp < enemy.maxHp * 0.3) ? 'var(--danger)' : 'var(--success)';
 
-            // Mise à jour des badges d'état
             renderStatus(player, 'player-status');
             renderStatus(enemy, 'enemy-status');
 
-            // Mise à jour des boutons et Cooldowns du joueur
             if (isPlayerTurn && gameActive) {
                 document.getElementById('action-buttons').style.opacity = '1';
                 document.getElementById('action-buttons').style.pointerEvents = 'auto';
                 
-                updateButton('briseDef', 'Réduit la Def (2T)', 3);
-                updateButton('stun', 'Étourdit l\'ennemi (1T)', 4);
-                updateButton('antiHeal', 'Bloque le soin (2T)', 3);
-                updateButton('bigHeal', 'Gros soin', 4);
+                updateButton('briseDef', 'Réduit la Def (2T)');
+                updateButton('stun', 'Étourdit l\'ennemi (1T)');
+                updateButton('antiHeal', 'Bloque le soin (2T)');
+                updateButton('bigHeal', 'Gros soin');
             } else {
                 document.getElementById('action-buttons').style.opacity = '0.5';
                 document.getElementById('action-buttons').style.pointerEvents = 'none';
@@ -168,9 +171,11 @@
             if (fighter.antiHealTurns > 0) container.innerHTML += `<span class="status-badge badge-antiheal">Anti-Soin (${fighter.antiHealTurns})</span>`;
         }
 
-        function updateButton(skill, baseText, maxCD) {
+        function updateButton(skill, baseText) {
             let btn = document.getElementById(`btn-${skill}`);
             let textSpan = document.getElementById(`cd-${skill}`);
+            if(!btn || btn.style.display === 'none') return; // Ne pas update si caché
+            
             if (player.cooldowns[skill] > 0) {
                 btn.disabled = true;
                 textSpan.innerText = `[Recharge : ${player.cooldowns[skill]} tours]`;
@@ -180,13 +185,9 @@
             }
         }
 
-        // --- GESTION DES TOUR ---
         function processTurnStart(fighter) {
-            // Décrémente les statuts
             if (fighter.defDebuffTurns > 0) fighter.defDebuffTurns--;
             if (fighter.antiHealTurns > 0) fighter.antiHealTurns--;
-            
-            // Décrémente les cooldowns
             for (let skill in fighter.cooldowns) {
                 if (fighter.cooldowns[skill] > 0) fighter.cooldowns[skill]--;
             }
@@ -197,21 +198,16 @@
             let attacker = isAi ? enemy : player;
             let target = isAi ? player : enemy;
 
-            // Vérifier le Stun AVANT l'action
-            if (attacker.stunTurns > 0) {
+            if (skillId === 'pass') {
                 log(`🛑 ${attacker.name} est ÉTOURDI et passe son tour !`);
                 attacker.stunTurns--;
                 endTurn(isAi);
                 return;
             }
 
-            let dmg = 0;
-            let heal = 0;
-            let skillName = "";
-
-            // Calcul des stats de base selon IA
-            let dmgMult = (isAi && difficulty === 'expert') ? 1.5 : (isAi && difficulty === 'difficile') ? 1.2 : 1;
-            if (target.defDebuffTurns > 0) dmgMult *= 1.5; // L'armure brisée rajoute 50% de dégâts pris
+            let dmg = 0, heal = 0, skillName = "";
+            let dmgMult = (isAi && difficulty === 'expert') ? 1.4 : (isAi && difficulty === 'difficile') ? 1.2 : 1;
+            if (target.defDebuffTurns > 0) dmgMult *= 1.5;
 
             switch(skillId) {
                 case 'basic':
@@ -221,55 +217,53 @@
                 case 'briseDef':
                     skillName = "Brise-Armure";
                     dmg = Math.floor((Math.random() * 10 + 10) * dmgMult);
-                    target.defDebuffTurns = 2; // Dure 2 tours
+                    target.defDebuffTurns = 2;
                     attacker.cooldowns.briseDef = 3;
-                    log(`🛡️ L'armure de ${target.name} est brisée pour 2 tours !`);
+                    log(`🛡️ ${target.name} a son armure brisée ! Il prendra plus de dégâts.`);
                     break;
                 case 'stun':
                     skillName = "Ban Chat";
                     dmg = Math.floor((Math.random() * 5 + 5) * dmgMult);
                     target.stunTurns = 1;
                     attacker.cooldowns.stun = 4;
-                    log(`🔨 ${target.name} se prend un BAN et passera son prochain tour !`);
+                    log(`🔨 BAM ! ${target.name} prend un Timeout et passera son prochain tour.`);
                     break;
                 case 'antiHeal':
                     skillName = "Toxicité";
                     dmg = Math.floor((Math.random() * 10 + 5) * dmgMult);
                     target.antiHealTurns = 2;
                     attacker.cooldowns.antiHeal = 3;
-                    log(`☠️ ${target.name} est infecté : impossible de se soigner pendant 2 tours !`);
+                    log(`☠️ ${target.name} est infecté. Impossible de se soigner pour l'instant !`);
                     break;
                 case 'smallHeal':
                     skillName = "Snack Rapide";
                     heal = Math.floor(Math.random() * 15 + 15);
                     break;
                 case 'bigHeal':
-                    skillName = "Trousse de Secours";
+                    skillName = "Trousse Secours";
                     heal = Math.floor(Math.random() * 30 + 40);
                     attacker.cooldowns.bigHeal = 4;
                     break;
             }
 
-            // Application Soin
             if (heal > 0) {
                 if (attacker.antiHealTurns > 0) {
-                    log(`🚫 ${attacker.name} essaie de faire [${skillName}] mais l'Anti-Soin bloque la régénération !`);
+                    log(`🚫 ${attacker.name} tente le [${skillName}] mais l'Anti-Soin bloque tout !`);
                 } else {
                     attacker.hp = Math.min(attacker.maxHp, attacker.hp + heal);
                     log(`💚 ${attacker.name} utilise [${skillName}] et récupère ${heal} PV.`);
                 }
             }
 
-            // Application Dégâts
             if (dmg > 0) {
                 target.hp = Math.max(0, target.hp - dmg);
-                log(`⚔️ ${attacker.name} lance [${skillName}] et inflige ${dmg} dégâts !`);
+                log(`⚔️ ${attacker.name} utilise [${skillName}] : -${dmg} PV !`);
             }
 
             updateUI();
             
             if (target.hp === 0) {
-                log(`🏆 TERMINE ! ${attacker.name} a remporté la victoire !`);
+                log(`🏆 TERMINE ! ${attacker.name} a gagné le combat !`);
                 gameActive = false;
                 document.getElementById('action-buttons').style.display = 'none';
                 document.getElementById('restart-btn').style.display = 'block';
@@ -287,68 +281,53 @@
                 isPlayerTurn = true;
                 processTurnStart(player);
                 updateUI();
-                
-                // Si le joueur commence son tour mais est stun, il passe auto
                 if (player.stunTurns > 0) {
-                    setTimeout(() => executeAction('pass', false), 1000);
+                    setTimeout(() => executeAction('pass', false), 1500);
                 }
             } else {
                 isPlayerTurn = false;
                 updateUI();
                 processTurnStart(enemy);
                 
-                // Délai pour simuler la réflexion de l'IA
-                setTimeout(() => {
-                    aiTurn();
-                }, 1500);
+                log(`🧠 ${enemy.name} réfléchit à sa prochaine action...`);
+                setTimeout(() => aiTurn(), 2000);
             }
         }
 
-        // --- INTELLIGENCE ARTIFICIELLE ---
         function aiTurn() {
             if (!gameActive) return;
-            
-            // Si l'IA est stun
-            if (enemy.stunTurns > 0) {
-                executeAction('pass', true);
-                return;
-            }
+            if (enemy.stunTurns > 0) { executeAction('pass', true); return; }
 
-            let availableSkills = ['basic'];
-            if (enemy.cooldowns.briseDef === 0) availableSkills.push('briseDef');
-            if (enemy.cooldowns.stun === 0) availableSkills.push('stun');
-            if (enemy.cooldowns.antiHeal === 0) availableSkills.push('antiHeal');
-            
-            // IA veut se soigner ?
-            let wantsToHeal = (enemy.hp < enemy.maxHp * 0.5) && (enemy.antiHealTurns === 0);
-            if (wantsToHeal) availableSkills.push('smallHeal');
-            if (wantsToHeal && enemy.cooldowns.bigHeal === 0) availableSkills.push('bigHeal');
-
+            let hpPercent = enemy.hp / enemy.maxHp;
+            let playerHpPercent = player.hp / player.maxHp;
             let chosenSkill = 'basic';
 
-            if (difficulty === 'expert') {
-                // Comportement intelligent en Expert
-                if (enemy.hp < enemy.maxHp * 0.35 && enemy.cooldowns.bigHeal === 0 && enemy.antiHealTurns === 0) {
-                    chosenSkill = 'bigHeal'; // Urgence vitale
-                } else if (player.hp < player.maxHp * 0.5 && enemy.cooldowns.antiHeal === 0 && player.antiHealTurns === 0) {
-                    chosenSkill = 'antiHeal'; // Empêche le joueur low HP de se soigner
-                } else if (enemy.cooldowns.stun === 0 && player.stunTurns === 0) {
-                    chosenSkill = 'stun'; // Place un stun dès que possible
-                } else if (enemy.cooldowns.briseDef === 0 && player.defDebuffTurns === 0) {
-                    chosenSkill = 'briseDef'; // Optimise les dégâts
-                } else if (wantsToHeal) {
-                    chosenSkill = 'smallHeal';
-                } else {
-                    chosenSkill = 'basic';
-                }
-            } else if (difficulty === 'difficile') {
-                // Moitié intelligent, moitié aléatoire
-                if (wantsToHeal && Math.random() > 0.5 && enemy.cooldowns.bigHeal === 0) chosenSkill = 'bigHeal';
-                else if (enemy.cooldowns.stun === 0 && Math.random() > 0.4) chosenSkill = 'stun';
-                else chosenSkill = availableSkills[Math.floor(Math.random() * availableSkills.length)];
-            } else {
-                // Normal / Facile : Totalement aléatoire parmi ce qui est dispo
-                chosenSkill = availableSkills[Math.floor(Math.random() * availableSkills.length)];
+            // Vérifier ce que l'IA a le droit de faire selon la difficulté
+            let canBriseDef = (difficulty !== 'facile' && enemy.cooldowns.briseDef === 0 && player.defDebuffTurns === 0);
+            let canBigHeal = (difficulty !== 'facile' && enemy.cooldowns.bigHeal === 0 && enemy.antiHealTurns === 0);
+            let canStun = ((difficulty === 'expert' || difficulty === 'difficile') && enemy.cooldowns.stun === 0 && player.stunTurns === 0);
+            let canAntiHeal = ((difficulty === 'expert' || difficulty === 'difficile') && enemy.cooldowns.antiHeal === 0 && player.antiHealTurns === 0);
+            let wantsSmallHeal = (hpPercent < 0.6 && enemy.antiHealTurns === 0);
+
+            // LOGIQUE ADAPTÉE À LA DIFFICULTÉ
+            if (difficulty === 'expert' || difficulty === 'difficile') {
+                if (hpPercent < 0.40 && canBigHeal) chosenSkill = 'bigHeal';
+                else if (hpPercent < 0.50 && wantsSmallHeal && Math.random() > 0.4) chosenSkill = 'smallHeal';
+                else if (playerHpPercent < 0.45 && canAntiHeal) chosenSkill = 'antiHeal';
+                else if (canStun) chosenSkill = 'stun';
+                else if (canBriseDef) chosenSkill = 'briseDef';
+                else chosenSkill = 'basic';
+            } 
+            else if (difficulty === 'normal') {
+                if (hpPercent < 0.35 && canBigHeal) chosenSkill = 'bigHeal';
+                else if (wantsSmallHeal && Math.random() > 0.5) chosenSkill = 'smallHeal';
+                else if (canBriseDef && Math.random() > 0.4) chosenSkill = 'briseDef';
+                else chosenSkill = 'basic';
+            } 
+            else { 
+                // Mode FACILE : Uniquement attaque de base et petit soin
+                if (hpPercent < 0.40 && wantsSmallHeal && Math.random() > 0.3) chosenSkill = 'smallHeal';
+                else chosenSkill = 'basic';
             }
 
             executeAction(chosenSkill, true);
