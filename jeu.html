@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>HOL Battle Game - Arène</title>
     <style>
-        body { background: #0e0e10; color: white; font-family: sans-serif; display: flex; justify-content: center; margin: 0; }
+        body { background: #0e0e10; color: white; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; margin: 0; }
         .container { width: 90%; max-width: 500px; margin-top: 20px; background: #1f1f23; padding: 20px; border-radius: 12px; }
         .btn-diff { display: block; width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 6px; cursor: pointer; color: white; font-weight: bold; }
         .roster { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
@@ -16,6 +16,7 @@
         .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         button { padding: 12px; cursor: pointer; background: #3a3a3c; color: white; border: none; border-radius: 6px; font-weight: bold; }
         button:hover { background: #505055; }
+        #log { height: 150px; background: #000; padding: 10px; font-size: 0.95rem; margin-bottom: 10px; border-radius: 6px; overflow-y: auto; border: 1px solid #333; display: flex; flex-direction: column; gap: 6px; color: #ccc; }
     </style>
 </head>
 <body>
@@ -38,7 +39,9 @@
             <div><h3 id="p-name">Joueur</h3><div class="health-bar-bg"><div id="p-bar" class="health-fill"></div></div><p id="p-hp">150/150</p></div>
             <div><h3 id="e-name">IA</h3><div class="health-bar-bg"><div id="e-bar" class="health-fill"></div></div><p id="e-hp">150/150</p></div>
         </div>
-        <div id="log" style="height: 60px; background:#000; padding:10px; font-size:0.9rem; margin-bottom:10px; border-radius:6px;">Le combat commence !</div>
+        
+        <div id="log"></div>
+        
         <div class="action-grid" id="actions">
             <button onclick="play('basic')" id="b-basic">Attaque</button>
             <button onclick="play('heal')" id="b-heal">Soin</button>
@@ -55,6 +58,17 @@
 
     <script>
         let diff, pHP=150, eHP=150, active=true;
+
+        // Messages d'action plus immersifs
+        const logs = {
+            'basic': "Tu portes un coup rapide ! L'IA vacille.",
+            'heal': "Tu reprends ton souffle, c'est mieux ! (+20 PV)",
+            'brise': "BRISAGE D'ARMURE ! Sa défense explose !",
+            'bigHeal': "Soin puissant ! Tu remontes en flèche ! (+50 PV)",
+            'stun': "BAN CHAT ! L'IA est neutralisée, elle ne peut rien faire !",
+            'toxic': "C'est toxique ! L'IA perd ses moyens !",
+            'ulti': "C'EST L'ULTI ! Dégâts dévastateurs, le chat est en feu ! 🔥"
+        };
 
         function init(d) {
             diff = d;
@@ -73,23 +87,29 @@
             document.getElementById('battle-screen').style.display = 'block';
             document.getElementById('p-name').innerText = name;
             
-            // Logique de visibilité : plus la difficulté monte, plus on a de skills
             document.getElementById('b-brise').style.display = (diff !== 'facile') ? 'block' : 'none';
             document.getElementById('b-bigHeal').style.display = (diff !== 'facile') ? 'block' : 'none';
             document.getElementById('b-stun').style.display = (diff === 'difficile' || diff === 'expert') ? 'block' : 'none';
             document.getElementById('b-toxic').style.display = (diff === 'difficile' || diff === 'expert') ? 'block' : 'none';
             document.getElementById('b-ulti').style.display = (diff === 'expert') ? 'block' : 'none';
+            log("Le combat commence ! Montre-leur qui est le boss.", "#f1c40f");
         }
 
         function play(action) {
             if(!active) return;
-            // Dégâts variables selon la compétence
-            let dmg = (action === 'basic') ? 15 : (action === 'ulti') ? 40 : 20;
-            eHP -= dmg; 
-            log("Tu as utilisé : " + action + " (" + dmg + " dégâts)");
+            
+            // Logique de jeu réelle
+            if (action === 'heal') { pHP = Math.min(150, pHP + 20); }
+            else if (action === 'bigHeal') { pHP = Math.min(150, pHP + 50); }
+            else {
+                let dmg = (action === 'basic') ? 15 : (action === 'ulti') ? 40 : 25;
+                eHP = Math.max(0, eHP - dmg);
+            }
+            
+            log(logs[action], "#3498db");
             updateUI();
             
-            if(eHP <= 0) endGame("Victoire !");
+            if(eHP <= 0) endGame("Victoire ! Le chat a gagné !");
             else {
                 active = false;
                 setTimeout(iaTurn, 1000);
@@ -98,10 +118,11 @@
 
         function iaTurn() {
             if(eHP <= 0) return;
-            pHP -= 15;
-            log("L'IA t'attaque !");
+            let iaDmg = 15;
+            pHP = Math.max(0, pHP - iaDmg);
+            log("L'IA réplique ! Tu prends -" + iaDmg + " PV.", "#e74c3c");
             updateUI();
-            if(pHP <= 0) endGame("Défaite...");
+            if(pHP <= 0) endGame("Défaite... Le chat est triste.");
             else active = true;
         }
 
@@ -112,11 +133,17 @@
             document.getElementById('e-bar').style.width = (eHP/150*100) + "%";
         }
 
-        function log(msg) { document.getElementById('log').innerText = msg; }
+        function log(msg, color = '#fff') {
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.style.color = color;
+            entry.innerText = "> " + msg;
+            logDiv.prepend(entry); // Le dernier message en haut
+        }
 
         function endGame(msg) {
             active = false;
-            log(msg);
+            log(msg, "#f1c40f");
             document.getElementById('actions').style.display = 'none';
             document.getElementById('end-menu').style.display = 'block';
         }
