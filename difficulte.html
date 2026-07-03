@@ -2,17 +2,31 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choix de la Difficulté</title>
     <link rel="stylesheet" href="style.css">
-    <title>Difficulté - house-of-laura-tcg</title>
 </head>
 <body>
+
     <div class="container">
-        <h1>HOUSE-OF-LAURA-TCG</h1>
-        <h3>Choisis ta difficulté</h3>
-        <a href="jeu.html?diff=facile" class="btn">FACILE (150 HP)</a>
-        <a href="jeu.html?diff=normal" class="btn">NORMAL (100 HP)</a>
-        <a href="jeu.html?diff=difficile" class="btn">DIFFICILE (50 HP)</a>
-        <br><a href="index.html" style="color:#ccc;">Retour</a>
+        <h1>Choix de la Difficulté</h1>
+        <p>Ajustez le niveau de l'IA avant de combattre.</p>
+        
+        <button onclick="setDifficulty('facile')">🟢 Facile</button>
+        <button onclick="setDifficulty('normal')">🟡 Normal</button>
+        <button onclick="setDifficulty('difficile')">🟠 Difficile</button>
+        <button style="border-color: red; color: red;" onclick="setDifficulty('expert')">🔴 Expert (Hardcore)</button>
+        
+        <br><br>
+        <button style="background: #333;" onclick="window.location.href='index.html'">Retour</button>
     </div>
+
+    <script>
+        function setDifficulty(level) {
+            // Sauvegarde le choix pour l'utiliser dans jeu.html
+            localStorage.setItem('hol_difficulte', level);
+            window.location.href = 'jeu.html';
+        }
+    </script>
 </body>
 </html>
