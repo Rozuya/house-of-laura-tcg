@@ -6,183 +6,23 @@
     <title>House of Laura | Accueil</title>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-base: #0e0e10;
-            --bg-panel: #18181b;
-            --twitch-purple: #9146ff;
-            --twitch-hover: #a970ff;
-            --text-main: #ffffff;
-            --text-muted: #adadb8;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            background-color: var(--bg-base);
-            color: var(--text-main);
-            font-family: 'Roboto', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-image: radial-gradient(circle at 50% 0%, rgba(145, 70, 255, 0.15), transparent 50%);
-        }
-
-        .container {
-            background: var(--bg-panel);
-            width: 100%;
-            max-width: 480px;
-            padding: 40px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-            text-align: center;
-            position: relative;
-        }
-
-        .header h1 {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 3rem;
-            color: var(--text-main);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 30px;
-        }
-
-        .header h1 span {
-            color: var(--twitch-purple);
-        }
-
-        .menu-btn {
-            display: block;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: var(--text-main);
-            padding: 16px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 1.3rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .menu-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateY(-2px);
-        }
-
-        .btn-primary {
-            background: var(--twitch-purple);
-            border-color: var(--twitch-purple);
-        }
-
-        .btn-primary:hover {
-            background: var(--twitch-hover);
-            border-color: var(--twitch-hover);
-            box-shadow: 0 8px 20px rgba(145, 70, 255, 0.3);
-        }
-
-        .content-section {
-            display: none;
-            text-align: left;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .content-section.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .content-title {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 2rem;
-            color: var(--twitch-purple);
-            margin-bottom: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding-bottom: 10px;
-        }
-
-        .content-text {
-            color: var(--text-muted);
-            line-height: 1.6;
-            margin-bottom: 25px;
-        }
-
-        .content-text p {
-            margin-bottom: 10px;
-        }
-
-        .footer {
-            margin-top: 30px;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            opacity: 0.7;
-        }
+        :root { --bg-base: #0e0e10; --bg-panel: #18181b; --twitch-purple: #9146ff; --twitch-hover: #a970ff; --text-main: #ffffff; --text-muted: #adadb8; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background-color: var(--bg-base); color: var(--text-main); font-family: 'Roboto', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; background-image: radial-gradient(circle at 50% 0%, rgba(145, 70, 255, 0.15), transparent 50%); }
+        .container { background: var(--bg-panel); width: 100%; max-width: 480px; padding: 40px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6); text-align: center; }
+        .header h1 { font-family: 'Rajdhani', sans-serif; font-size: 3rem; margin-bottom: 30px; }
+        .header h1 span { color: var(--twitch-purple); }
+        .menu-btn { display: block; width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-main); padding: 16px; margin-bottom: 15px; border-radius: 8px; font-family: 'Rajdhani', sans-serif; font-size: 1.3rem; font-weight: 700; text-transform: uppercase; cursor: pointer; transition: 0.3s; }
+        .menu-btn:hover { background: rgba(255, 255, 255, 0.1); }
+        .btn-primary { background: var(--twitch-purple); }
+        .footer { margin-top: 30px; font-size: 0.85rem; color: var(--text-muted); }
     </style>
 </head>
 <body>
-
     <div class="container">
-        <div class="header">
-            <h1>House of <span>Laura</span></h1>
-        </div>
-
-        <!-- Menu Principal -->
-        <div id="view-menu" class="content-section active">
-            <button class="menu-btn btn-primary" onclick="window.location.href='jeu.html'">Lancer le Jeu (3v3)</button>
-            <button class="menu-btn" onclick="switchView('view-rules')">Règles du Jeu</button>
-            <button class="menu-btn" onclick="switchView('view-options')">Paramètres</button>
-        </div>
-
-        <!-- Section Règles -->
-        <div id="view-rules" class="content-section">
-            <h2 class="content-title">Comment Jouer</h2>
-            <div class="content-text">
-                <p><strong>1. La Draft :</strong> Le jeu sélectionne 6 personnages au hasard. 3 pour ton équipe, 3 pour l'équipe adverse.</p>
-                <p><strong>2. Le Combat :</strong> Clique sur l'une de tes cartes pour attaquer. La cible est choisie aléatoirement parmi les ennemis en vie.</p>
-                <p><strong>3. La Riposte :</strong> L'intelligence artificielle contre-attaque immédiatement après ton tour.</p>
-                <p><strong>4. Objectif :</strong> Élimine l'équipe adverse avant que tes points de vie ne tombent à zéro.</p>
-            </div>
-            <button class="menu-btn" onclick="switchView('view-menu')">Retour au menu</button>
-        </div>
-
-        <!-- Section Options -->
-        <div id="view-options" class="content-section">
-            <h2 class="content-title">Paramètres</h2>
-            <div class="content-text">
-                <p><em>Note : Les fonctionnalités avancées de sauvegarde et d'audio seront déployées dans une mise à jour ultérieure.</em></p>
-                <p>✔️ Mode sombre activé par défaut.</p>
-                <p>✔️ Animations fluides activées.</p>
-                <p>✔️ Optimisation mobile activée.</p>
-            </div>
-            <button class="menu-btn" onclick="switchView('view-menu')">Retour au menu</button>
-        </div>
-
-        <div class="footer">
-            &copy; 2024 House of Laura - Tous droits réservés.
-        </div>
+        <div class="header"><h1>House of <span>Laura</span></h1></div>
+        <button class="menu-btn btn-primary" onclick="window.location.href='jeu.html'">Lancer le Jeu (3v3)</button>
+        <div class="footer">&copy; 2026 House of Laura - Tous droits réservés.</div>
     </div>
-
-    <script>
-        function switchView(viewId) {
-            document.querySelectorAll('.content-section').forEach(el => {
-                el.classList.remove('active');
-            });
-            document.getElementById(viewId).classList.add('active');
-        }
-    </script>
 </body>
 </html>
