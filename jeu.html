@@ -6,9 +6,13 @@
     <style>
         body { background: #0e0e10; color: white; font-family: sans-serif; margin: 0; min-height: 100vh; display: flex; justify-content: center; align-items: center; }
         .container { width: 90%; max-width: 500px; background: #1f1f23; padding: 20px; border-radius: 12px; }
+        /* Style modal */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); }
+        .modal-content { background: #18181c; margin: 10% auto; padding: 20px; border: 2px solid #9146ff; border-radius: 12px; width: 85%; max-width: 400px; color: white; position: relative; }
+        .close-btn { position: absolute; top: 10px; right: 15px; font-size: 24px; cursor: pointer; }
+        
         .roster { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .character-card { background: #3a3a3c; padding: 15px; border-radius: 6px; cursor: pointer; text-align: center; }
-        .character-card:hover { background: #9146ff; }
         .arena { display: flex; justify-content: space-between; margin-bottom: 20px; text-align: center; }
         .health-bar-bg { width: 100%; background: #000; height: 15px; border-radius: 5px; }
         .health-fill { height: 100%; background: #2ecc71; width: 100%; transition: width 0.3s; }
@@ -28,6 +32,8 @@
 
     <!-- Combat -->
     <div class="container" id="battle-screen" style="display: none;">
+        <button style="background:transparent; border:1px solid #9146ff; color:#9146ff; padding:5px 10px; border-radius:4px; margin-bottom:10px; cursor:pointer;" onclick="document.getElementById('info-modal').style.display='block'">📜 Voir Infos Compétences</button>
+        
         <div class="arena">
             <div><h3 id="p-name">Joueur</h3><div class="health-bar-bg"><div id="p-bar" class="health-fill"></div></div><p id="p-hp">150/150</p></div>
             <div><h3 id="e-name">Ennemi</h3><div class="health-bar-bg"><div id="e-bar" class="health-fill"></div></div><p id="e-hp">150/150</p></div>
@@ -41,6 +47,24 @@
             <button class="skill" id="s-stun" onclick="play('stun')">Ban Chat</button>
             <button class="skill" id="s-toxic" onclick="play('toxic')">Toxicité</button>
             <button class="skill" id="s-ulti" onclick="play('ulti')">ULTI</button>
+        </div>
+    </div>
+
+    <!-- Modale Infos -->
+    <div id="info-modal" class="modal" onclick="this.style.display='none'">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <span class="close-btn" onclick="document.getElementById('info-modal').style.display='none'">&times;</span>
+            <h2>Statistiques Compétences</h2>
+            <table style="width:100%; border-collapse: collapse; color: #ddd; font-size: 0.9rem;">
+                <tr style="border-bottom:1px solid #444; color:#fff;"><th>Compétence</th><th>Effet</th><th>Recharge</th></tr>
+                <tr><td style="padding:5px;">Attaque</td><td>15 Dmg</td><td>0 tour</td></tr>
+                <tr><td style="padding:5px;">Soin</td><td>+20 PV</td><td>2 tours</td></tr>
+                <tr><td style="padding:5px;">Brise Armure</td><td>25 Dmg</td><td>2 tours</td></tr>
+                <tr><td style="padding:5px;">Gros Soin</td><td>+50 PV</td><td>3 tours</td></tr>
+                <tr><td style="padding:5px;">Ban Chat</td><td>Neutralise</td><td>4 tours</td></tr>
+                <tr><td style="padding:5px;">Toxicité</td><td>Poison</td><td>4 tours</td></tr>
+                <tr><td style="padding:5px;">ULTI</td><td>40 Dmg</td><td>6 tours</td></tr>
+            </table>
         </div>
     </div>
 
@@ -58,7 +82,6 @@
             'ulti': { cdMax: 6, currentCd: 0 }
         };
 
-        // Génération personnages
         const r = document.getElementById('roster');
         heroes.forEach(n => {
             let d = document.createElement('div'); d.className='character-card'; d.innerText=n;
@@ -72,7 +95,6 @@
             const others = heroes.filter(h => h !== name);
             document.getElementById('e-name').innerText = others[Math.floor(Math.random() * others.length)];
             
-            // Masquer selon diff
             document.getElementById('s-brise').style.display = (diff === 'facile') ? 'none' : 'block';
             document.getElementById('s-bigHeal').style.display = (diff === 'facile') ? 'none' : 'block';
             document.getElementById('s-stun').style.display = (diff === 'difficile' || diff === 'expert') ? 'block' : 'none';
@@ -108,7 +130,10 @@
             document.getElementById('e-bar').style.width = (eHP/150*100) + "%";
             for(let k in skillConfig) {
                 let btn = document.getElementById('s-' + k);
-                if(btn) btn.disabled = (skillConfig[k].currentCd > 0);
+                if(btn) {
+                    btn.disabled = (skillConfig[k].currentCd > 0);
+                    btn.style.opacity = (skillConfig[k].currentCd > 0) ? "0.5" : "1";
+                }
             }
         }
     </script>
