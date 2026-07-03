@@ -4,27 +4,16 @@
     <meta charset="UTF-8">
     <title>HOL Battle Game - Arène</title>
     <style>
-        body { 
-            background: #0e0e10; color: white; font-family: sans-serif; 
-            margin: 0; min-height: 100vh; 
-            display: flex; justify-content: center; align-items: center; 
-        }
+        body { background: #0e0e10; color: white; font-family: sans-serif; margin: 0; min-height: 100vh; display: flex; justify-content: center; align-items: center; }
         .container { width: 90%; max-width: 500px; background: #1f1f23; padding: 20px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .btn-diff { display: block; width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 6px; cursor: pointer; color: white; font-weight: bold; }
-        .roster { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .character-card { background: #3a3a3c; padding: 15px; border-radius: 6px; cursor: pointer; text-align: center; }
-        .character-card:hover { background: #9146ff; }
-        
         .arena { display: flex; justify-content: space-between; margin-bottom: 20px; text-align: center; }
         .health-bar-bg { width: 100%; background: #000; height: 15px; border-radius: 5px; margin-top: 5px; }
         .health-fill { height: 100%; background: #2ecc71; width: 100%; transition: width 0.3s; }
-        
         .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        button.skill { 
-            padding: 10px; cursor: pointer; background: #3a3a3c; color: white; 
-            border: none; border-radius: 6px; font-size: 0.85rem; text-align: center; 
-        }
-        button.skill:hover { background: #505055; }
+        
+        button.skill { padding: 10px; cursor: pointer; background: #3a3a3c; color: white; border: none; border-radius: 6px; font-size: 0.85rem; }
+        button.skill:hover:not(:disabled) { background: #505055; }
+        button.skill:disabled { background: #222; color: #666; cursor: not-allowed; opacity: 0.7; }
         button.skill strong { display: block; font-size: 1rem; color: #fff; }
         button.skill small { color: #aaa; }
         
@@ -33,23 +22,7 @@
 </head>
 <body>
 
-    <!-- Écran Difficulté -->
-    <div class="container" id="difficulty-screen">
-        <h1>Choisis la Difficulté</h1>
-        <button class="btn-diff" style="background:#2ecc71" onclick="init('facile')">Facile</button>
-        <button class="btn-diff" style="background:#3498db" onclick="init('normal')">Normal</button>
-        <button class="btn-diff" style="background:#e67e22" onclick="init('difficile')">Difficile</button>
-        <button class="btn-diff" style="background:#e74c3c" onclick="init('expert')">Expert</button>
-    </div>
-
-    <!-- Écran Personnage -->
-    <div class="container" id="selection-screen" style="display: none;">
-        <h1>Choisis ton héros</h1>
-        <div class="roster" id="roster"></div>
-    </div>
-
-    <!-- Écran Combat -->
-    <div class="container" id="battle-screen" style="display: none;">
+    <div class="container" id="battle-screen">
         <div class="arena">
             <div style="width: 45%;"><h3 id="p-name">Joueur</h3><div class="health-bar-bg"><div id="p-bar" class="health-fill"></div></div><p id="p-hp">150/150</p></div>
             <div style="width: 45%;"><h3 id="e-name">Ennemi</h3><div class="health-bar-bg"><div id="e-bar" class="health-fill"></div></div><p id="e-hp">150/150</p></div>
@@ -58,70 +31,63 @@
         <div id="log"></div>
         
         <div class="action-grid" id="actions">
-            <button class="skill" onclick="play('basic')"><strong>Attaque</strong><small>15 dégâts</small></button>
-            <button class="skill" onclick="play('heal')"><strong>Soin</strong><small>+20 PV</small></button>
-            <button class="skill" id="b-brise" onclick="play('brise')"><strong>Brise Armure</strong><small>25 dégâts</small></button>
-            <button class="skill" id="b-bigHeal" onclick="play('bigHeal')"><strong>Gros Soin</strong><small>+50 PV</small></button>
-            <button class="skill" id="b-stun" onclick="play('stun')"><strong>Ban Chat</strong><small>Neutralise l'IA</small></button>
-            <button class="skill" id="b-toxic" onclick="play('toxic')"><strong>Toxicité</strong><small>Inflige poison</small></button>
-            <button class="skill" id="b-ulti" onclick="play('ulti')" style="background:#9146ff"><strong>ULTI</strong><small>40 dégâts</small></button>
-        </div>
-        <div id="end-menu" style="display:none; text-align:center; margin-top:20px;">
-            <button onclick="location.reload()" style="background:#9146ff; padding:15px; width:100%; border:none; border-radius:6px; color:white; font-weight:bold;">Rejouer / Menu</button>
+            <button class="skill" id="s-basic" onclick="play('basic')"><strong>Attaque</strong><small>15 dmg (0 tour)</small></button>
+            <button class="skill" id="s-heal" onclick="play('heal')"><strong>Soin</strong><small>+20 PV (2 tours)</small></button>
+            <button class="skill" id="s-brise" onclick="play('brise')"><strong>Brise Armure</strong><small>25 dmg (2 tours)</small></button>
+            <button class="skill" id="s-bigHeal" onclick="play('bigHeal')"><strong>Gros Soin</strong><small>+50 PV (3 tours)</small></button>
+            <button class="skill" id="s-stun" onclick="play('stun')"><strong>Ban Chat</strong><small>Neutralise (4 tours)</small></button>
+            <button class="skill" id="s-toxic" onclick="play('toxic')"><strong>Toxicité</strong><small>Poison (4 tours)</small></button>
+            <button class="skill" id="s-ulti" onclick="play('ulti')" style="background:#9146ff"><strong>ULTI</strong><small>40 dmg (6 tours)</small></button>
         </div>
     </div>
 
     <script>
-        let diff, pHP=150, eHP=150, active=true;
-        const heroes = ["House of Laura", "HOL Tony", "HOL Rozuya", "HOL Omass", "K974YT", "Dark MortelCygne"];
+        // Configuration des compétences et leurs recharges (cooldowns)
+        const skillConfig = {
+            'basic': { name: 'Attaque', cdMax: 0, currentCd: 0 },
+            'heal': { name: 'Soin', cdMax: 2, currentCd: 0 },
+            'brise': { name: 'Brise Armure', cdMax: 2, currentCd: 0 },
+            'bigHeal': { name: 'Gros Soin', cdMax: 3, currentCd: 0 },
+            'stun': { name: 'Ban Chat', cdMax: 4, currentCd: 0 },
+            'toxic': { name: 'Toxicité', cdMax: 4, currentCd: 0 },
+            'ulti': { name: 'ULTI', cdMax: 6, currentCd: 0 }
+        };
 
-        function init(d) {
-            diff = d;
-            document.getElementById('difficulty-screen').style.display = 'none';
-            document.getElementById('selection-screen').style.display = 'block';
-            let r = document.getElementById('roster');
-            heroes.forEach(n => {
-                let d = document.createElement('div'); d.className='character-card'; d.innerText=n;
-                d.onclick = () => start(n); r.appendChild(d);
-            });
-        }
-
-        function start(name) {
-            document.getElementById('selection-screen').style.display = 'none';
-            document.getElementById('battle-screen').style.display = 'block';
-            document.getElementById('p-name').innerText = name;
-            
-            // Choisir un ennemi aléatoire parmi les autres
-            const others = heroes.filter(h => h !== name);
-            const enemyName = others[Math.floor(Math.random() * others.length)];
-            document.getElementById('e-name').innerText = enemyName;
-            
-            // Visibilité boutons
-            document.getElementById('b-brise').style.display = (diff !== 'facile') ? 'block' : 'none';
-            document.getElementById('b-bigHeal').style.display = (diff !== 'facile') ? 'block' : 'none';
-            document.getElementById('b-stun').style.display = (diff === 'difficile' || diff === 'expert') ? 'block' : 'none';
-            document.getElementById('b-toxic').style.display = (diff === 'difficile' || diff === 'expert') ? 'block' : 'none';
-            document.getElementById('b-ulti').style.display = (diff === 'expert') ? 'block' : 'none';
-            log("Combat contre " + enemyName + " !", "#f1c40f");
-        }
+        let pHP=150, eHP=150, active=true;
 
         function play(action) {
             if(!active) return;
-            if (action === 'heal') { pHP = Math.min(150, pHP + 20); }
-            else if (action === 'bigHeal') { pHP = Math.min(150, pHP + 50); }
+            
+            // Appliquer l'effet
+            if (action === 'heal') pHP = Math.min(150, pHP + 20);
+            else if (action === 'bigHeal') pHP = Math.min(150, pHP + 50);
             else {
                 let dmg = (action === 'basic') ? 15 : (action === 'ulti') ? 40 : 25;
                 eHP = Math.max(0, eHP - dmg);
             }
-            log("Tu as utilisé " + action + " !", "#3498db");
+
+            // Mettre en cooldown
+            skillConfig[action].currentCd = skillConfig[action].cdMax;
+
+            log("Tu as utilisé : " + skillConfig[action].name, "#3498db");
             updateUI();
+            
             if(eHP <= 0) endGame("Victoire !");
-            else { active = false; setTimeout(iaTurn, 1000); }
+            else {
+                active = false;
+                setTimeout(iaTurn, 1000);
+            }
         }
 
         function iaTurn() {
             if(eHP <= 0) return;
             pHP = Math.max(0, pHP - 15);
+            
+            // Décrémenter tous les cooldowns après le tour de l'IA
+            for (let key in skillConfig) {
+                if (skillConfig[key].currentCd > 0) skillConfig[key].currentCd--;
+            }
+            
             log("L'ennemi t'attaque (-15 PV)", "#e74c3c");
             updateUI();
             if(pHP <= 0) endGame("Défaite...");
@@ -133,6 +99,18 @@
             document.getElementById('e-hp').innerText = eHP + "/150";
             document.getElementById('p-bar').style.width = (pHP/150*100) + "%";
             document.getElementById('e-bar').style.width = (eHP/150*100) + "%";
+
+            // Mise à jour visuelle des boutons
+            for (let key in skillConfig) {
+                let btn = document.getElementById('s-' + key);
+                if (skillConfig[key].currentCd > 0) {
+                    btn.disabled = true;
+                    btn.querySelector('small').innerText = "Recharge : " + skillConfig[key].currentCd;
+                } else {
+                    btn.disabled = false;
+                    // Reset texte (facultatif, selon ta préférence)
+                }
+            }
         }
 
         function log(msg, color) {
@@ -147,7 +125,6 @@
             active = false;
             log(msg, "#f1c40f");
             document.getElementById('actions').style.display = 'none';
-            document.getElementById('end-menu').style.display = 'block';
         }
     </script>
 </body>
