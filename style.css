@@ -6,6 +6,8 @@
     --text-light: #efeff1;
     --danger: #e74c3c;
     --success: #2ecc71;
+    --warning: #f39c12;
+    --info: #3498db;
 }
 
 body {
@@ -43,94 +45,69 @@ h1 {
 }
 
 h2 { color: var(--neon-pink); }
+h3 { margin-bottom: 5px; }
 
 /* Boutons stylisés */
 button {
     background: var(--twitch-purple);
     color: white;
     border: 2px solid transparent;
-    padding: 15px 30px;
-    margin: 10px;
-    font-size: 1.2rem;
+    padding: 12px 20px;
+    margin: 5px;
+    font-size: 1rem;
     cursor: pointer;
     border-radius: 8px;
     transition: all 0.3s ease;
     font-weight: bold;
-    text-transform: uppercase;
 }
 
-button:hover {
+button:hover:not(:disabled) {
     background: transparent;
     border-color: var(--neon-pink);
     color: var(--neon-pink);
-    box-shadow: 0 0 20px rgba(255, 0, 255, 0.4);
-    transform: translateY(-3px);
+    box-shadow: 0 0 15px rgba(255, 0, 255, 0.4);
+    transform: translateY(-2px);
 }
 
-/* Modales (Pop-ups) */
-.modal {
-    display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: var(--panel-bg);
-    padding: 30px;
-    border: 2px solid var(--twitch-purple);
-    z-index: 100;
-    border-radius: 10px;
-    box-shadow: 0 0 50px rgba(0,0,0,0.9);
-    width: 80%;
-    max-width: 500px;
-}
-
-.overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.8);
-    z-index: 50;
-    backdrop-filter: blur(5px);
+button:disabled {
+    background: #444;
+    color: #888;
+    cursor: not-allowed;
+    border-color: #222;
 }
 
 /* Éléments du jeu */
-.roster {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 15px;
-}
-
+.roster { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; }
 .character-card {
-    background: #2a2a2d;
-    padding: 20px;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: 0.3s;
-    border: 2px solid transparent;
-    font-weight: bold;
+    background: #2a2a2d; padding: 20px; border-radius: 10px; cursor: pointer;
+    transition: 0.3s; border: 2px solid transparent; font-weight: bold;
 }
-
-.character-card:hover {
-    border-color: var(--twitch-purple);
-    background: #3a3a3d;
-    transform: scale(1.05);
-}
+.character-card:hover { border-color: var(--twitch-purple); background: #3a3a3d; transform: scale(1.05); }
 
 .arena {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 30px;
-    background: #000;
-    padding: 20px;
-    border-radius: 10px;
-    border: 1px solid var(--twitch-purple);
+    display: flex; justify-content: space-between; margin-top: 20px;
+    background: #000; padding: 20px; border-radius: 10px; border: 1px solid var(--twitch-purple);
 }
 
 .fighter { width: 45%; }
-.health-bar-bg { width: 100%; background: #333; border-radius: 10px; height: 25px; margin-top: 10px; overflow: hidden;}
+.health-bar-bg { width: 100%; background: #333; border-radius: 10px; height: 25px; margin-top: 5px; overflow: hidden; position: relative;}
 .health-fill { height: 100%; background: var(--success); width: 100%; transition: width 0.3s, background-color 0.3s; }
-#combat-log { margin-top: 20px; padding: 15px; background: #111; border-radius: 5px; height: 100px; overflow-y: auto; color: #aaa; font-style: italic; }
+.hp-text { position: absolute; width: 100%; text-align: center; top: 2px; font-weight: bold; text-shadow: 1px 1px 2px black; font-size: 0.9em; }
+
+.status-effects { display: flex; justify-content: center; gap: 5px; min-height: 25px; margin-top: 10px; font-size: 0.8em; }
+.status-badge { padding: 3px 8px; border-radius: 5px; font-weight: bold; }
+.badge-stun { background: var(--warning); color: #000; }
+.badge-def { background: var(--info); color: #fff; }
+.badge-antiheal { background: var(--twitch-purple); color: #fff; }
+
+#combat-log { margin-top: 20px; padding: 15px; background: #111; border-radius: 5px; height: 120px; overflow-y: auto; color: #aaa; font-style: italic; text-align: left; border-left: 3px solid var(--twitch-purple); }
+
+/* Grille d'actions */
+.action-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.cooldown-text { font-size: 0.8em; display: block; font-weight: normal; color: #ccc; }
