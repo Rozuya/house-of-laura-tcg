@@ -6,23 +6,84 @@
     <title>House of Laura | Accueil</title>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        :root { --bg-base: #0e0e10; --bg-panel: #18181b; --twitch-purple: #9146ff; --twitch-hover: #a970ff; --text-main: #ffffff; --text-muted: #adadb8; }
+        :root { 
+            --bg-base: #0e0e10; 
+            --bg-panel: #18181b; 
+            --twitch-purple: #9146ff; 
+            --text-main: #ffffff; 
+            --text-muted: #adadb8; 
+        }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background-color: var(--bg-base); color: var(--text-main); font-family: 'Roboto', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; background-image: radial-gradient(circle at 50% 0%, rgba(145, 70, 255, 0.15), transparent 50%); }
-        .container { background: var(--bg-panel); width: 100%; max-width: 480px; padding: 40px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6); text-align: center; }
-        .header h1 { font-family: 'Rajdhani', sans-serif; font-size: 3rem; margin-bottom: 30px; }
+        body { 
+            background-color: var(--bg-base); 
+            color: var(--text-main); 
+            font-family: 'Roboto', sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+        }
+        .container { 
+            background: var(--bg-panel); 
+            width: 100%; 
+            max-width: 480px; 
+            padding: 40px; 
+            border-radius: 12px; 
+            border: 1px solid rgba(255, 255, 255, 0.05); 
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6); 
+            text-align: center; 
+        }
+        .header h1 { 
+            font-family: 'Rajdhani', sans-serif; 
+            font-size: 3rem; 
+            text-transform: uppercase; 
+            margin-bottom: 30px; 
+        }
         .header h1 span { color: var(--twitch-purple); }
-        .menu-btn { display: block; width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-main); padding: 16px; margin-bottom: 15px; border-radius: 8px; font-family: 'Rajdhani', sans-serif; font-size: 1.3rem; font-weight: 700; text-transform: uppercase; cursor: pointer; transition: 0.3s; }
+        
+        .menu-btn { 
+            display: block; 
+            width: 100%; 
+            background: rgba(255, 255, 255, 0.05); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            color: var(--text-main); 
+            padding: 16px; 
+            margin-bottom: 15px; 
+            border-radius: 8px; 
+            font-family: 'Rajdhani', sans-serif; 
+            font-size: 1.3rem; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+        }
         .menu-btn:hover { background: rgba(255, 255, 255, 0.1); }
-        .btn-primary { background: var(--twitch-purple); }
-        .footer { margin-top: 30px; font-size: 0.85rem; color: var(--text-muted); }
+        .btn-primary { background: var(--twitch-purple); border-color: var(--twitch-purple); }
+        .btn-primary:hover { background: #a970ff; border-color: #a970ff; }
+        
+        .footer { 
+            margin-top: 30px; 
+            font-size: 0.85rem; 
+            color: var(--text-muted); 
+            opacity: 0.7; 
+        }
     </style>
 </head>
 <body>
+
     <div class="container">
-        <div class="header"><h1>House of <span>Laura</span></h1></div>
+        <div class="header">
+            <h1>House of <span>Laura</span></h1>
+        </div>
+
         <button class="menu-btn btn-primary" onclick="window.location.href='jeu.html'">Lancer le Jeu (3v3)</button>
-        <div class="footer">&copy; 2026 House of Laura - Tous droits réservés.</div>
+        <button class="menu-btn">Règles du Jeu</button>
+        <button class="menu-btn">Paramètres</button>
+
+        <div class="footer">
+            &copy; 2026 House of Laura - Tous droits réservés.
+        </div>
     </div>
+
 </body>
 </html>
