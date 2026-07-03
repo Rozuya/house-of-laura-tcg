@@ -3,40 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="style.css">
-    <title>Combat</title>
+    <title>Combat en cours</title>
 </head>
 <body>
     <div class="container">
-        <h1>Le Combat commence !</h1>
-        <p id="diff-display" style="font-weight: bold;"></p>
+        <h1>COMBAT 3 VS 3</h1>
+        <div id="diff-label"></div>
 
-        <h3>Ton équipe</h3>
-        <div class="hero-box" id="my-team"></div>
-
-        <h3>Équipe adverse</h3>
-        <div class="hero-box" id="enemy-team"></div>
-
+        <div class="battle-arena">
+            <div class="team-zone">
+                <h3>VOTRE ÉQUIPE</h3>
+                <div id="my-team"></div>
+            </div>
+            <div class="team-zone">
+                <h3>ENNEMIS</h3>
+                <div id="enemy-team"></div>
+            </div>
+        </div>
+        
         <br>
-        <a href="index.html" class="btn">Retour Menu</a>
+        <button onclick="location.reload()" class="btn">RELANCER LE COMBAT</button>
+        <a href="index.html" class="btn">QUITTER</a>
     </div>
 
     <script>
-        // 1. Liste des héros
         const heroes = ["HOL Omass", "K974YT", "HOL Rozuya", "House of Laura", "Dark Mortel", "HOL Tony"];
         
-        // 2. Mélange (Aléatoire)
+        // Initialisation
+        const params = new URLSearchParams(window.location.search);
+        const diff = params.get('diff') || 'normal';
+        const hp = diff === 'facile' ? 150 : (diff === 'difficile' ? 50 : 100);
+        document.getElementById('diff-label').innerText = "Difficulté : " + diff.toUpperCase() + " (" + hp + " HP)";
+
+        // Génération
         let shuffled = heroes.sort(() => 0.5 - Math.random());
         let myTeam = shuffled.slice(0, 3);
         let enemyTeam = shuffled.slice(3, 6);
 
-        // 3. Affichage
-        document.getElementById('my-team').innerHTML = myTeam.map(h => `<div class="hero-card">${h}</div>`).join('');
-        document.getElementById('enemy-team').innerHTML = enemyTeam.map(h => `<div class="hero-card">${h}</div>`).join('');
+        function renderTeam(team, elementId) {
+            const container = document.getElementById(elementId);
+            team.forEach(hero => {
+                container.innerHTML += `
+                    <div class="fighter">
+                        ${hero}
+                        <div class="hp-bar"><div class="hp-fill" style="width: 100%"></div></div>
+                        <small>${hp} / ${hp} HP</small>
+                    </div>`;
+            });
+        }
 
-        // 4. Récupérer difficulté
-        const urlParams = new URLSearchParams(window.location.search);
-        const diff = urlParams.get('diff') || "Normal";
-        document.getElementById('diff-display').innerText = "Difficulté : " + diff;
+        renderTeam(myTeam, 'my-team');
+        renderTeam(enemyTeam, 'enemy-team');
     </script>
 </body>
 </html>
