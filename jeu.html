@@ -2,60 +2,107 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>House of Laura | Menu</title>
+    <title>House of Laura | Arena</title>
     <style>
-        body { margin: 0; background: #060608; color: white; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .box { background: #121212; padding: 40px; border-radius: 20px; text-align: center; width: 350px; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        h1 { font-size: 2rem; color: #9146ff; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 2px; }
-        button { width: 100%; padding: 15px; margin: 8px 0; background: #1c1c1c; border: 1px solid #444; color: white; cursor: pointer; border-radius: 10px; font-weight: bold; transition: 0.3s; text-transform: uppercase; }
-        button:hover { background: #9146ff; border-color: #9146ff; }
-        .view { display: none; }
-        .active { display: block; }
-        .text { text-align: left; font-size: 0.95rem; color: #ccc; line-height: 1.6; padding: 10px; }
-        .date { color: #9146ff; font-weight: bold; }
+        :root { --leg: #f59e0b; --epi: #a855f7; --rare: #3b82f6; --com: #22c55e; --bg: #060608; }
+        body { margin: 0; background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        
+        #game-board { display: flex; flex-direction: column; justify-content: space-between; height: 100vh; padding: 20px; box-sizing: border-box; }
+        
+        .zone { display: flex; justify-content: center; gap: 20px; padding: 20px; background: rgba(255,255,255,0.03); border-radius: 15px; }
+        
+        .card { width: 140px; height: 190px; background: #121212; border: 4px solid #333; border-radius: 12px; cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        .card:hover { transform: translateY(-10px); }
+        .card.selected { border-color: #9146ff; box-shadow: 0 0 20px #9146ff; }
+        .card.target { border-color: #ef4444; box-shadow: 0 0 20px #ef4444; }
+        .card.legendary { border-color: var(--leg); }
+        .card.epic { border-color: var(--epi); }
+        .card.rare { border-color: var(--rare); }
+        .card.common { border-color: var(--com); }
+
+        #ui-layer { position: absolute; top: 45%; left: 0; width: 100%; text-align: center; }
+        .btn { padding: 12px 25px; background: #18181b; border: 1px solid #444; color: white; cursor: pointer; margin: 5px; border-radius: 6px; font-weight: bold; }
+        .btn:hover { background: #9146ff; border-color: #9146ff; }
     </style>
 </head>
 <body>
-    <div class="box">
-        <!-- MENU PRINCIPAL -->
-        <div id="main" class="view active">
-            <h1>HOUSE OF LAURA</h1>
-            <button onclick="window.location.href='jeu.html'">LANCER LE JEU</button>
-            <button onclick="show('rules')">RÈGLES</button>
-            <button onclick="show('news')">ACTUS</button>
-            <button onclick="show('settings')">PARAMÈTRES</button>
-        </div>
-        
-        <!-- RÈGLES -->
-        <div id="rules" class="view">
-            <h1>RÈGLES</h1>
-            <div class="text">Sélectionne ton héros, choisis une attaque tactique, et clique sur l'ennemi pour le combattre. Élimine toute l'équipe adverse pour remporter la victoire !</div>
-            <button onclick="show('main')">RETOUR</button>
-        </div>
 
-        <!-- ACTUS -->
-        <div id="news" class="view">
-            <h1>ACTUS</h1>
-            <div class="text">
-                <p><span class="date">03/07/2026</span> : Publication officielle du jeu.</p>
-                <p><span class="date">À venir</span> : Le mode local arrive bientôt pour affronter tes amis sur le même écran !</p>
-                <p>Restez connectés pour les prochaines mises à jour.</p>
-            </div>
-            <button onclick="show('main')">RETOUR</button>
-        </div>
+    <div id="setup" style="text-align:center; margin-top:20%;">
+        <h1>CHOISIR DIFFICULTÉ</h1>
+        <button class="btn" onclick="init('facile')">FACILE</button>
+        <button class="btn" onclick="init('difficile')">DIFFICILE</button>
+    </div>
 
-        <!-- PARAMÈTRES -->
-        <div id="settings" class="view">
-            <h1>PARAMÈTRES</h1>
-            <div class="text">Audio : Activé<br>Graphismes : Ultra<br>Serveur : Europe 1<br>Version : 1.2.0</div>
-            <button onclick="show('main')">RETOUR</button>
+    <div id="game-board" style="display:none;">
+        <div id="opponent-zone" class="zone"></div>
+        <div id="ui-layer">
+            <h2 id="status">Sélectionne ton héros</h2>
+            <div id="actions"></div>
         </div>
+        <div id="player-zone" class="zone"></div>
     </div>
 
     <script>
-        function show(id) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
+        const ROSTER = [
+            {n: "House of Laura", r: "legendary", s: [{n:"Ban", d:35}, {n:"Soin", d:-30}]},
+            {n: "HOL Tony", r: "epic", s: [{n:"Mod", d:25}, {n:"Hype", d:40}]},
+            {n: "HOL Rozuya", r: "rare", s: [{n:"Troll", d:20}, {n:"Clip", d:35}]},
+            {n: "HOL Omass", r: "rare", s: [{n:"Spam", d:22}, {n:"Don", d:30}]},
+            {n: "K974YT", r: "common", s: [{n:"Follow", d:18}, {n:"Lurk", d:25}]},
+            {n: "Dark Mortel", r: "common", s: [{n:"Flame", d:20}, {n:"Back", d:28}]}
+        ];
+
+        let state = { pTeam: [], eTeam: [], selected: null, skill: null, diff: '' };
+
+        function init(d) {
+            state.diff = d;
+            let deck = [...ROSTER].sort(() => Math.random() - 0.5);
+            state.pTeam = deck.slice(0, 3).map(c => ({...c, hp: 100}));
+            state.eTeam = deck.slice(3, 6).map(c => ({...c, hp: 100}));
+            document.getElementById('setup').style.display = 'none';
+            document.getElementById('game-board').style.display = 'flex';
+            render();
+        }
+
+        function render() {
+            document.getElementById('opponent-zone').innerHTML = state.eTeam.map((c, i) => 
+                `<div class="card ${c.r} ${state.skill ? 'target' : ''}" onclick="attack(${i})">
+                    <strong>${c.n}</strong><div style="font-size:1.2rem; margin-top:10px;">${c.hp} HP</div>
+                </div>`).join('');
+            document.getElementById('player-zone').innerHTML = state.pTeam.map((c, i) => 
+                `<div class="card ${c.r} ${state.selected === i ? 'selected' : ''}" onclick="select(${i})">
+                    <strong>${c.n}</strong><div style="font-size:1.2rem; margin-top:10px;">${c.hp} HP</div>
+                </div>`).join('');
+        }
+
+        function select(i) {
+            state.selected = i;
+            document.getElementById('status').innerText = "Choisis ton attaque";
+            document.getElementById('actions').innerHTML = state.pTeam[i].s.map(sk => 
+                `<button class="btn" onclick="setSkill('${sk.n}', ${sk.d})">${sk.n}</button>`).join('');
+            render();
+        }
+
+        function setSkill(name, dmg) { 
+            state.skill = {name, dmg}; 
+            document.getElementById('status').innerText = "Cible un ennemi !"; 
+            document.getElementById('actions').innerHTML = ""; 
+        }
+
+        function attack(i) {
+            if(!state.skill) return;
+            state.eTeam[i].hp = Math.max(0, state.eTeam[i].hp - state.skill.dmg);
+            state.selected = null; state.skill = null;
+            document.getElementById('status').innerText = "Attaque lancée !";
+            render();
+            setTimeout(aiMove, 1000);
+        }
+
+        function aiMove() {
+            let dmg = state.diff === 'difficile' ? 25 : 10;
+            let t = state.pTeam[Math.floor(Math.random() * state.pTeam.length)];
+            t.hp = Math.max(0, t.hp - dmg);
+            render();
         }
     </script>
 </body>
