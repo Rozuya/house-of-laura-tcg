@@ -5,14 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>House of Laura - L'Arène</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Styles rapides pour l'écran de difficulté intégré */
+        .diff-grid {
+            display: block;
+            margin-top: 20px;
+        }
+        .btn-diff {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 12px 0;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            color: white;
+            transition: transform 0.1s;
+        }
+        .btn-diff:hover { transform: scale(1.02); }
+        .diff-facile { background: #2ecc71; }
+        .diff-normal { background: #3498db; }
+        .diff-difficile { background: #e67e22; }
+        .diff-expert { background: #e74c3c; }
+    </style>
 </head>
 <body>
 
-    <div class="container" id="selection-screen">
+    <div class="container" id="difficulty-screen">
+        <h1>Choisis la Difficulté</h1>
+        <div class="diff-grid">
+            <button class="btn-diff diff-facile" onclick="selectDifficulty('facile')">🟢 Facile (Interface simplifiée - 2 compétences)</button>
+            <button class="btn-diff diff-normal" onclick="selectDifficulty('normal')">🟡 Normal (Stratégie intermédiaire - 4 compétences)</button>
+            <button class="btn-diff diff-difficile" onclick="selectDifficulty('difficile')">🟠 Difficile (Combat complet - 6 compétences)</button>
+            <button class="btn-diff diff-expert" onclick="selectDifficulty('expert')">🔴 Expert (IA redoutable - 6 compétences)</button>
+        </div>
+        <br>
+        <button style="background: #333; width:100%; padding:12px; border-radius:6px; border:none; color:white; font-weight:bold; cursor:pointer;" onclick="window.location.href='index.html'">Retour au Menu</button>
+    </div>
+
+    <div class="container" id="selection-screen" style="display: none;">
         <h1>Choisis ton Combattant</h1>
         <div class="roster" id="roster"></div>
         <br>
-        <button style="background: #333;" onclick="window.location.href='difficulte.html'">Retour</button>
+        <button style="background: #333;" onclick="backToDifficulty()">Retour</button>
     </div>
 
     <div class="container" id="battle-screen" style="display: none;">
@@ -52,7 +89,7 @@
                 🛡️ Brise-Armure <span class="cooldown-text" id="cd-briseDef">Réduit la Def (2T)</span>
             </button>
             <button onclick="executeAction('bigHeal')" id="btn-bigHeal">
-                🚑 Trousse Secours <span class="cooldown-text" id="cd-bigHeal">Gros soin</span>
+                離開 Trousse Secours <span class="cooldown-text" id="cd-bigHeal">Gros soin</span>
             </button>
 
             <button onclick="executeAction('stun')" id="btn-stun">
@@ -69,7 +106,7 @@
 
     <script>
         const characters = ["House of Laura", "HOL Tony", "HOL Rozuya", "HOL Omass", "K974YT", "Dark MortelCygne"];
-        let difficulty = localStorage.getItem('hol_difficulte') || 'normal';
+        let difficulty = 'normal'; // Sera écrasé par le choix du joueur
         let isPlayerTurn = true;
         let gameActive = true;
 
@@ -89,6 +126,7 @@
 
         let player, enemy;
 
+        // Génération initiale du roster
         const rosterDiv = document.getElementById('roster');
         characters.forEach(char => {
             let div = document.createElement('div');
@@ -98,6 +136,21 @@
             rosterDiv.appendChild(div);
         });
 
+        // Étape 1 -> Étape 2
+        function selectDifficulty(chosenDiff) {
+            difficulty = chosenDiff;
+            localStorage.setItem('hol_difficulte', chosenDiff); // Optionnel, garde en mémoire au cas où
+            document.getElementById('difficulty-screen').style.display = 'none';
+            document.getElementById('selection-screen').style.display = 'block';
+        }
+
+        // Retour Étape 2 -> Étape 1
+        function backToDifficulty() {
+            document.getElementById('selection-screen').style.display = 'none';
+            document.getElementById('difficulty-screen').style.display = 'block';
+        }
+
+        // Étape 2 -> Étape 3 (Lancement du combat)
         function startGame(selectedChar) {
             let remainingChars = characters.filter(c => c !== selectedChar);
             let enemyName = remainingChars[Math.floor(Math.random() * remainingChars.length)];
@@ -113,20 +166,27 @@
             document.getElementById('selection-screen').style.display = 'none';
             document.getElementById('battle-screen').style.display = 'block';
             document.getElementById('player-name').innerText = player.name;
-            document.getElementById('enemy-name').innerText = enemy.name + ` (IA ${difficulty})`;
+            document.getElementById('enemy-name').innerText = enemy.name + ` (IA ${difficulty.toUpperCase()})`;
             
             document.getElementById('player-maxhp-text').innerText = player.maxHp;
             document.getElementById('enemy-maxhp-text').innerText = enemy.maxHp;
 
-            // ADAPTATION DE L'INTERFACE SELON LA DIFFICULTÉ
+            // ADAPTATION DYNAMIQUE DES BOUTONS SELON LA DIFFICULTÉ CHOISIE
             if (difficulty === 'facile') {
                 document.getElementById('btn-briseDef').style.display = 'none';
                 document.getElementById('btn-bigHeal').style.display = 'none';
                 document.getElementById('btn-stun').style.display = 'none';
                 document.getElementById('btn-antiHeal').style.display = 'none';
             } else if (difficulty === 'normal') {
+                document.getElementById('btn-briseDef').style.display = 'block';
+                document.getElementById('btn-bigHeal').style.display = 'block';
                 document.getElementById('btn-stun').style.display = 'none';
                 document.getElementById('btn-antiHeal').style.display = 'none';
+            } else {
+                document.getElementById('btn-briseDef').style.display = 'block';
+                document.getElementById('btn-bigHeal').style.display = 'block';
+                document.getElementById('btn-stun').style.display = 'block';
+                document.getElementById('btn-antiHeal').style.display = 'block';
             }
 
             updateUI();
@@ -174,7 +234,7 @@
         function updateButton(skill, baseText) {
             let btn = document.getElementById(`btn-${skill}`);
             let textSpan = document.getElementById(`cd-${skill}`);
-            if(!btn || btn.style.display === 'none') return; // Ne pas update si caché
+            if(!btn || btn.style.display === 'none') return;
             
             if (player.cooldowns[skill] > 0) {
                 btn.disabled = true;
@@ -290,7 +350,7 @@
                 processTurnStart(enemy);
                 
                 log(`🧠 ${enemy.name} réfléchit à sa prochaine action...`);
-                setTimeout(() => aiTurn(), 2000);
+                setTimeout(() => aiTurn(), 1800);
             }
         }
 
@@ -302,14 +362,12 @@
             let playerHpPercent = player.hp / player.maxHp;
             let chosenSkill = 'basic';
 
-            // Vérifier ce que l'IA a le droit de faire selon la difficulté
             let canBriseDef = (difficulty !== 'facile' && enemy.cooldowns.briseDef === 0 && player.defDebuffTurns === 0);
             let canBigHeal = (difficulty !== 'facile' && enemy.cooldowns.bigHeal === 0 && enemy.antiHealTurns === 0);
             let canStun = ((difficulty === 'expert' || difficulty === 'difficile') && enemy.cooldowns.stun === 0 && player.stunTurns === 0);
             let canAntiHeal = ((difficulty === 'expert' || difficulty === 'difficile') && enemy.cooldowns.antiHeal === 0 && player.antiHealTurns === 0);
             let wantsSmallHeal = (hpPercent < 0.6 && enemy.antiHealTurns === 0);
 
-            // LOGIQUE ADAPTÉE À LA DIFFICULTÉ
             if (difficulty === 'expert' || difficulty === 'difficile') {
                 if (hpPercent < 0.40 && canBigHeal) chosenSkill = 'bigHeal';
                 else if (hpPercent < 0.50 && wantsSmallHeal && Math.random() > 0.4) chosenSkill = 'smallHeal';
@@ -325,7 +383,6 @@
                 else chosenSkill = 'basic';
             } 
             else { 
-                // Mode FACILE : Uniquement attaque de base et petit soin
                 if (hpPercent < 0.40 && wantsSmallHeal && Math.random() > 0.3) chosenSkill = 'smallHeal';
                 else chosenSkill = 'basic';
             }
