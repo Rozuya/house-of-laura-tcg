@@ -2,66 +2,178 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>House of Laura - Combat !</title>
     <link rel="stylesheet" href="style.css">
-    <title>Combat - house-of-laura-tcg</title>
 </head>
 <body>
-    <div class="container">
-        <h1>HOUSE-OF-LAURA-TCG : COMBAT</h1>
-        <div id="diff-label"></div>
-        <div class="battle-arena">
-            <div class="team-zone">
-                <h3>VOTRE ÉQUIPE</h3>
-                <div id="my-team"></div>
-            </div>
-            <div class="team-zone">
-                <h3>ENNEMIS (Clique pour attaquer)</h3>
-                <div id="enemy-team"></div>
-            </div>
+
+    <div class="container" id="selection-screen">
+        <h1>Choisis ton Personnage</h1>
+        <div class="roster" id="roster">
+            <!-- Rempli par le JS -->
         </div>
         <br>
-        <button onclick="location.reload()" class="btn">RELANCER LE COMBAT</button>
-        <a href="index.html" class="btn">QUITTER</a>
+        <button style="background: #333;" onclick="window.location.href='difficulte.html'">Retour</button>
+    </div>
+
+    <div class="container" id="battle-screen" style="display: none;">
+        <h2 id="battle-title">Combat</h2>
+        
+        <div class="arena">
+            <div class="fighter" id="player-box">
+                <h3 id="player-name">Joueur</h3>
+                <div class="health-bar-bg"><div class="health-fill" id="player-hp-bar"></div></div>
+                <p>HP: <span id="player-hp-text">100</span></p>
+            </div>
+            
+            <div class="fighter" id="enemy-box">
+                <h3 id="enemy-name">IA</h3>
+                <div class="health-bar-bg"><div class="health-fill" id="enemy-hp-bar" style="background: red;"></div></div>
+                <p>HP: <span id="enemy-hp-text">100</span></p>
+            </div>
+        </div>
+
+        <div id="combat-log">Le combat va commencer...</div>
+
+        <div id="action-buttons" style="margin-top: 20px;">
+            <button onclick="attack()">⚔️ Attaquer</button>
+            <button onclick="heal()">💊 Se Soigner</button>
+        </div>
+
+        <button id="restart-btn" style="display:none; background: var(--twitch-purple); margin-top:20px;" onclick="window.location.href='jeu.html'">Rejouer</button>
+        <button style="background: #333; margin-top:20px;" onclick="window.location.href='index.html'">Menu Principal</button>
     </div>
 
     <script>
-        const heroes = ["HOL Omass", "K974YT", "HOL Rozuya", "House of Laura", "Dark Mortel", "HOL Tony"];
-        const params = new URLSearchParams(window.location.search);
-        const diff = params.get('diff') || 'normal';
-        let maxHP = diff === 'facile' ? 150 : (diff === 'difficile' ? 50 : 100);
-        let enemyHP = {};
+        const characters = ["House of Laura", "HOL Tony", "HOL Rozuya", "HOL Omass", "K974YT", "Dark MortelCygne"];
+        
+        let player = { name: "", maxHp: 100, hp: 100 };
+        let enemy = { name: "", maxHp: 100, hp: 100, dmgMult: 1 };
+        let difficulty = localStorage.getItem('hol_difficulte') || 'normal';
+        let isPlayerTurn = true;
 
-        let shuffled = heroes.sort(() => 0.5 - Math.random());
-        let myTeam = shuffled.slice(0, 3);
-        let enemyTeam = shuffled.slice(3, 6);
+        // Génération de l'écran de sélection
+        const rosterDiv = document.getElementById('roster');
+        characters.forEach(char => {
+            let div = document.createElement('div');
+            div.className = 'character-card';
+            div.innerText = char;
+            div.onclick = () => startGame(char);
+            rosterDiv.appendChild(div);
+        });
 
-        function initGame() {
-            document.getElementById('diff-label').innerText = "Difficulté : " + diff.toUpperCase();
-            const myContainer = document.getElementById('my-team');
-            myTeam.forEach(h => myContainer.innerHTML += `<div class="fighter">${h}<br>${maxHP} HP</div>`);
+        function startGame(selectedChar) {
+            player.name = selectedChar;
+            
+            // Choisir un ennemi aléatoire différent du joueur
+            let remainingChars = characters.filter(c => c !== selectedChar);
+            enemy.name = remainingChars[Math.floor(Math.random() * remainingChars.length)];
 
-            const enemyContainer = document.getElementById('enemy-team');
-            enemyTeam.forEach(h => {
-                enemyHP[h] = maxHP;
-                enemyContainer.innerHTML += `
-                    <div class="fighter enemy-fighter" id="card-${h}" onclick="attaquer('${h}')">
-                        ${h}
-                        <div class="hp-bar"><div class="hp-fill" id="hp-${h}" style="width: 100%"></div></div>
-                        <span id="text-${h}">${maxHP} HP</span>
-                    </div>`;
-            });
+            // Appliquer les stats selon la difficulté
+            if (difficulty === 'facile') {
+                player.maxHp = 120; enemy.maxHp = 70; enemy.dmgMult = 0.6;
+            } else if (difficulty === 'normal') {
+                player.maxHp = 100; enemy.maxHp = 100; enemy.dmgMult = 1;
+            } else if (difficulty === 'difficile') {
+                player.maxHp = 100; enemy.maxHp = 150; enemy.dmgMult = 1.3;
+            } else if (difficulty === 'expert') {
+                player.maxHp = 80; enemy.maxHp = 200; enemy.dmgMult = 1.8; // IA OP
+            }
+
+            player.hp = player.maxHp;
+            enemy.hp = enemy.maxHp;
+
+            // Affichage
+            document.getElementById('selection-screen').style.display = 'none';
+            document.getElementById('battle-screen').style.display = 'block';
+            document.getElementById('player-name').innerText = player.name;
+            document.getElementById('enemy-name').innerText = enemy.name + ` (IA ${difficulty})`;
+            
+            updateUI();
+            log(`Le combat commence ! ${player.name} VS ${enemy.name}`);
         }
 
-        function attaquer(nom) {
-            if (enemyHP[nom] > 0) {
-                enemyHP[nom] -= 20;
-                if (enemyHP[nom] < 0) enemyHP[nom] = 0;
-                document.getElementById('hp-' + nom).style.width = (enemyHP[nom] / maxHP * 100) + "%";
-                document.getElementById('text-' + nom).innerText = enemyHP[nom] + " HP";
-                if (enemyHP[nom] === 0) document.getElementById('card-' + nom).classList.add('defeated');
+        function updateUI() {
+            document.getElementById('player-hp-text').innerText = player.hp;
+            document.getElementById('enemy-hp-text').innerText = enemy.hp;
+            document.getElementById('player-hp-bar').style.width = (player.hp / player.maxHp * 100) + "%";
+            document.getElementById('enemy-hp-bar').style.width = (enemy.hp / enemy.maxHp * 100) + "%";
+            
+            // Change couleur si HP bas
+            document.getElementById('player-hp-bar').style.background = (player.hp < player.maxHp * 0.3) ? 'var(--danger)' : 'var(--success)';
+        }
+
+        function log(msg) {
+            const logBox = document.getElementById('combat-log');
+            logBox.innerHTML = `<div>> ${msg}</div>` + logBox.innerHTML;
+        }
+
+        function attack() {
+            if (!isPlayerTurn) return;
+            let dmg = Math.floor(Math.random() * 15) + 10; // Dégâts entre 10 et 24
+            enemy.hp -= dmg;
+            if (enemy.hp < 0) enemy.hp = 0;
+            log(`Vous attaquez ${enemy.name} et infligez ${dmg} dégâts !`);
+            updateUI();
+            checkWin();
+        }
+
+        function heal() {
+            if (!isPlayerTurn) return;
+            let healAmt = Math.floor(Math.random() * 15) + 15;
+            player.hp += healAmt;
+            if (player.hp > player.maxHp) player.hp = player.maxHp;
+            log(`Vous vous soignez de ${healAmt} PV !`);
+            updateUI();
+            enemyTurn();
+        }
+
+        function checkWin() {
+            if (enemy.hp === 0) {
+                log(`🏆 VICTOIRE ! ${player.name} a vaincu l'IA !`);
+                endGame();
+            } else {
+                enemyTurn();
             }
         }
-        initGame();
+
+        function enemyTurn() {
+            isPlayerTurn = false;
+            document.getElementById('action-buttons').style.opacity = '0.5';
+            
+            setTimeout(() => {
+                // Logique de l'IA experte
+                if (difficulty === 'expert' && enemy.hp < enemy.maxHp * 0.3 && Math.random() > 0.4) {
+                    // L'IA Experte se soigne si elle a peu de vie
+                    let healAmt = Math.floor(Math.random() * 20) + 20;
+                    enemy.hp += healAmt;
+                    log(`🚨 ${enemy.name} se soigne stratégiquement de ${healAmt} PV !`);
+                } else {
+                    // Attaque normale
+                    let dmg = Math.floor((Math.random() * 12 + 8) * enemy.dmgMult);
+                    player.hp -= dmg;
+                    if (player.hp < 0) player.hp = 0;
+                    log(`💥 ${enemy.name} attaque et vous inflige ${dmg} dégâts !`);
+                }
+                
+                updateUI();
+                
+                if (player.hp === 0) {
+                    log(`💀 DÉFAITE... ${enemy.name} vous a écrasé.`);
+                    endGame();
+                } else {
+                    isPlayerTurn = true;
+                    document.getElementById('action-buttons').style.opacity = '1';
+                }
+            }, 1000); // 1 seconde de délai pour l'IA
+        }
+
+        function endGame() {
+            isPlayerTurn = false;
+            document.getElementById('action-buttons').style.display = 'none';
+            document.getElementById('restart-btn').style.display = 'inline-block';
+        }
     </script>
 </body>
 </html>
