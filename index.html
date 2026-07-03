@@ -2,23 +2,52 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>House of Laura | Home</title>
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+    <title>House of Laura | Menu</title>
     <style>
-        body { margin: 0; background: #0e0e10; color: white; font-family: 'Rajdhani', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .menu-box { width: 320px; text-align: center; }
-        h1 { font-size: 3rem; margin-bottom: 40px; letter-spacing: 2px; }
-        span { color: #9146ff; }
-        button { width: 100%; padding: 15px; margin: 10px 0; background: #18181b; border: 2px solid #333; color: white; cursor: pointer; font-size: 1.2rem; text-transform: uppercase; border-radius: 8px; transition: 0.3s; }
-        button:hover { border-color: #9146ff; box-shadow: 0 0 15px #9146ff; }
+        body { margin: 0; background: #060608; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .box { background: #121212; padding: 40px; border-radius: 20px; text-align: center; width: 350px; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h1 { font-size: 2rem; color: #9146ff; margin-bottom: 30px; text-transform: uppercase; }
+        button { width: 100%; padding: 15px; margin: 8px 0; background: #1c1c1c; border: 1px solid #444; color: white; cursor: pointer; border-radius: 10px; font-weight: bold; transition: 0.3s; }
+        button:hover { background: #9146ff; border-color: #9146ff; }
+        .view { display: none; }
+        .active { display: block; }
+        .text { text-align: left; font-size: 0.9rem; color: #ccc; line-height: 1.5; }
     </style>
 </head>
 <body>
-    <div class="menu-box">
-        <h1>HOUSE OF <span>LAURA</span></h1>
-        <button onclick="window.location.href='jeu.html'">JOUER</button>
-        <button onclick="alert('Règles : Éliminez l'équipe adverse avec vos compétences.')">RÈGLES</button>
-        <button onclick="alert('Paramètres indisponibles.')">PARAMÈTRES</button>
+    <div class="box">
+        <div id="main" class="view active">
+            <h1>HOUSE OF LAURA</h1>
+            <button onclick="window.location.href='jeu.html'">JOUER</button>
+            <button onclick="show('rules')">RÈGLES</button>
+            <button onclick="show('news')">ACTUS</button>
+            <button onclick="show('settings')">PARAMÈTRES</button>
+        </div>
+        
+        <div id="rules" class="view">
+            <h1>RÈGLES</h1>
+            <div class="text">Sélectionne ton héros, choisis une attaque, et clique sur l'ennemi pour combattre. Élimine l'équipe adverse pour gagner !</div>
+            <button onclick="show('main')">RETOUR</button>
+        </div>
+
+        <div id="news" class="view">
+            <h1>ACTUS</h1>
+            <div class="text">• 03/07/2026 : Mise à jour de l'interface Snap.<br>• Le mode classé arrive bientôt !</div>
+            <button onclick="show('main')">RETOUR</button>
+        </div>
+
+        <div id="settings" class="view">
+            <h1>PARAMÈTRES</h1>
+            <div class="text">Audio : 100%<br>Graphismes : Ultra<br>Version : 1.2.0</div>
+            <button onclick="show('main')">RETOUR</button>
+        </div>
     </div>
+
+    <script>
+        function show(id) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+    </script>
 </body>
 </html>
