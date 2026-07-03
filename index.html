@@ -6,7 +6,6 @@
     <title>House of Laura - Accueil</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Styles spécifiques à la page d'accueil (pour intégrer le design proprement) */
         :root {
             --twitch-purple: #9146ff;
             --bg-dark: #0e0e10;
@@ -71,19 +70,16 @@
             background: #4a4a4c;
         }
 
-        /* ========================================================
-           ✨ LE POPUP (FENÊTRE MODALE) ASSEZ PROPRE ET ADAPTÉ
-           ======================================================== */
         .modal {
-            display: none; /* Masqué par défaut */
+            display: none;
             position: fixed;
-            z-index: 1000; /* Passe au-dessus de tout le reste */
+            z-index: 1000;
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.85); /* Fond noir transparent */
-            backdrop-filter: blur(6px); /* Effet flouté à l'arrière-plan */
+            background-color: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(6px);
         }
 
         .modal-content {
@@ -99,16 +95,14 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
             animation: popupApparition 0.3s ease-in-out;
             max-height: 75vh;
-            overflow-y: auto; /* Permet d'avoir une barre de défilement SI le texte est trop grand */
+            overflow-y: auto;
         }
 
-        /* Petite animation sympa quand le popup s'ouvre */
         @keyframes popupApparition {
             from { opacity: 0; transform: scale(0.9); }
             to { opacity: 1; transform: scale(1); }
         }
 
-        /* Le fameux bouton de fermeture (la croix "X") */
         .close-btn {
             position: absolute;
             top: 12px;
@@ -125,7 +119,6 @@
             color: #ffffff;
         }
 
-        /* Contenu du popup */
         .modal h2 {
             color: var(--twitch-purple);
             margin-top: 0;
@@ -164,8 +157,6 @@
         <h1>House of Laura</h1>
         
         <button class="menu-btn" onclick="window.location.href='jeu.html'">🎮 Jouer</button>
-        <button class="menu-btn secondary" onclick="window.location.href='difficulte.html'">⚙️ Difficulté</button>
-        
         <button class="menu-btn secondary" onclick="openModal()">📜 Règles & Actus</button>
     </div>
 
@@ -183,32 +174,21 @@
             </ul>
 
             <h3>🔥 Actus du Site</h3>
-            <p class="news-date">Dernière mise à jour : v2.0</p>
+            <p class="news-date">Dernière mise à jour : v2.5</p>
             <ul>
-                <li>🧠 <strong>IA Améliorée :</strong> L'ordinateur ne fait plus n'importe quoi, il réfléchit, anticipe et se soigne en priorité s'il descend sous la barre des 40% de PV !</li>
-                <li>⚡ <strong>Difficulté dynamique :</strong> L'interface de combat adapte automatiquement ses compétences à ton choix de difficulté.</li>
-                <li>💎 <strong>Design épuré :</strong> Intégration de cette fenêtre de dialogue "pop-up" pour ne pas surcharger l'écran principal.</li>
+                <li>🧠 <strong>IA Améliorée :</strong> L'ordinateur réfléchit, anticipe et se soigne en priorité s'il descend sous la barre des 40% de PV !</li>
+                <li>⚡ <strong style="color: #ffd700;">Parcours Intuitif :</strong> Suppression du bouton difficulté du menu principal. Tout se choisit désormais naturellement après avoir cliqué sur "Jouer".</li>
+                <li>💎 <strong>Design épuré :</strong> Intégration d'une fenêtre de dialogue "pop-up" pour les règles.</li>
             </ul>
         </div>
     </div>
 
     <script>
-        // Fonction pour afficher le popup
-        function openModal() {
-            document.getElementById('rules-modal').style.display = 'block';
-        }
-
-        // Fonction pour fermer le popup
-        function closeModal() {
-            document.getElementById('rules-modal').style.display = 'none';
-        }
-
-        // PETIT BONUS : Si le joueur clique en dehors de la boîte (sur le fond noir), ça ferme aussi le popup !
+        function openModal() { document.getElementById('rules-modal').style.display = 'block'; }
+        function closeModal() { document.getElementById('rules-modal').style.display = 'none'; }
         window.onclick = function(event) {
             let modal = document.getElementById('rules-modal');
-            if (event.target === modal) {
-                closeModal();
-            }
+            if (event.target === modal) { closeModal(); }
         }
     </script>
 </body>
