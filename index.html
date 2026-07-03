@@ -1,33 +1,13 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>House of Laura | Menu</title>
-    <style>
-        @keyframes gradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: white;
-               background: linear-gradient(-45deg, #0f172a, #312e81, #1e1b4b, #0f172a); background-size: 400% 400%; animation: gradient 15s ease infinite; }
-        .box { background: rgba(0,0,0,0.6); padding: 40px; border-radius: 20px; text-align: center; width: 320px; border: 1px solid #4f46e5; backdrop-filter: blur(10px); }
-        h1 { font-size: 1.8rem; color: #a78bfa; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 2px; }
-        button { width: 100%; padding: 15px; margin: 8px 0; background: #1e1b4b; border: 1px solid #4f46e5; color: white; cursor: pointer; border-radius: 10px; font-weight: bold; transition: 0.3s; }
-        button:hover { background: #4f46e5; }
-        .view { display: none; }
-        .active { display: block; }
-        .text { text-align: left; font-size: 0.9rem; color: #e2e8f0; line-height: 1.5; }
-    </style>
-</head>
-<body>
-    <div class="box">
-        <div id="main" class="view active">
-            <h1>HOUSE OF LAURA</h1>
-            <button onclick="window.location.href='jeu.html'">LANCER LE JEU</button>
-            <button onclick="document.getElementById('rules').style.display='block'; document.getElementById('main').style.display='none'">RÈGLES</button>
-        </div>
-        <div id="rules" class="view">
-            <h1>RÈGLES</h1>
-            <div class="text">Combat tactique. Choisis ton héros, attaque l'adversaire et gagne la partie !</div>
-            <button onclick="location.reload()">RETOUR</button>
-        </div>
-    </div>
-</body>
-</html>
+<div class="container">
+    <h1>HOUSE OF LAURA</h1>
+    <a href="choix_hero.html" class="btn">LANCER LE JEU</a>
+    <a href="regles.html" class="btn">RÈGLES</a>
+
+    <section id="actus" style="margin-top: 40px; border-top: 2px solid #4a3f99; padding-top: 20px;">
+        <h2>Dernières Actus</h2>
+        <ul>
+            <li>Mise à jour 1.2 : Nouveaux héros ajoutés !</li>
+            <li>Le mode tournoi arrive bientôt...</li>
+        </ul>
+    </section>
+</div>
