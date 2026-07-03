@@ -2,35 +2,35 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arena</title>
+    <title>House of Laura | Arena</title>
     <style>
         :root { --leg: #f59e0b; --epi: #a855f7; --rare: #3b82f6; --com: #22c55e; }
-        body { margin: 0; background: #060608; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        body { margin: 0; background: #060608; color: white; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
         .arena { width: 95%; max-width: 900px; text-align: center; }
-        .team { display: flex; justify-content: center; gap: 15px; margin: 20px 0; flex-wrap: wrap; }
-        /* Style Carte */
-        .card { width: 120px; height: 160px; background: #121212; border: 3px solid #333; border-radius: 10px; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; padding: 10px; transition: 0.2s; }
+        .team { display: flex; justify-content: center; gap: 20px; margin: 30px 0; }
+        
+        /* Style Carte "Snap" */
+        .card { width: 130px; height: 180px; background: #1c1c1f; border-radius: 12px; border: 4px solid #333; cursor: pointer; transition: 0.3s; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         .card:hover { transform: scale(1.05); }
-        .selected { border-color: #9146ff !important; box-shadow: 0 0 15px #9146ff; }
-        .target { border-color: #ef4444 !important; }
-        /* Raretés */
+        .card.selected { border-color: #9146ff; box-shadow: 0 0 20px #9146ff; }
+        .card.target { border-color: #ef4444; box-shadow: 0 0 20px #ef4444; }
         .card.legendary { border-color: var(--leg); }
         .card.epic { border-color: var(--epi); }
         .card.rare { border-color: var(--rare); }
         .card.common { border-color: var(--com); }
-        /* Buttons */
-        .btn { padding: 10px 20px; background: #222; border: 1px solid #444; color: white; cursor: pointer; margin: 5px; border-radius: 5px; }
-        .btn:hover { background: #9146ff; }
+        
+        .hp-badge { position: absolute; bottom: 10px; background: #000; padding: 5px 10px; border-radius: 5px; font-weight: bold; }
+        .btn { padding: 12px 25px; background: #9146ff; border: none; color: white; border-radius: 8px; cursor: pointer; margin: 5px; font-weight: bold; text-transform: uppercase; }
     </style>
 </head>
 <body>
     <div class="arena">
         <div id="setup">
-            <h1>CHOISIR DIFFICULTÉ</h1>
-            <button class="btn" onclick="startGame('facile')">FACILE</button>
-            <button class="btn" onclick="startGame('difficile')">DIFFICILE</button>
+            <h1>SÉLECTIONNE LA DIFFICULTÉ</h1>
+            <button class="btn" onclick="init('facile')">FACILE</button>
+            <button class="btn" onclick="init('difficile')">DIFFICILE</button>
         </div>
+
         <div id="game" style="display:none;">
             <h2 id="status">Sélectionne un héros</h2>
             <div id="e-team" class="team"></div>
@@ -40,22 +40,22 @@
     </div>
 
     <script>
-        const CARDS = [
+        const ROSTER = [
             {n: "House of Laura", r: "legendary", s: [{n:"Ban", d:35}, {n:"Soin", d:-30}]},
             {n: "HOL Tony", r: "epic", s: [{n:"Mod", d:25}, {n:"Hype", d:40}]},
             {n: "HOL Rozuya", r: "rare", s: [{n:"Troll", d:20}, {n:"Clip", d:35}]},
             {n: "HOL Omass", r: "rare", s: [{n:"Spam", d:22}, {n:"Don", d:30}]},
             {n: "K974YT", r: "common", s: [{n:"Follow", d:18}, {n:"Lurk", d:25}]},
-            {n: "Dark MortelCygne", r: "common", s: [{n:"Flame", d:20}, {n:"Back", d:28}]}
+            {n: "Dark Mortel", r: "common", s: [{n:"Flame", d:20}, {n:"Back", d:28}]}
         ];
 
         let state = { pTeam: [], eTeam: [], selected: null, skill: null, diff: '' };
 
-        function startGame(d) {
+        function init(d) {
             state.diff = d;
-            let dck = [...CARDS].sort(() => Math.random() - 0.5);
-            state.pTeam = dck.slice(0, 3).map(c => ({...c, hp: 100}));
-            state.eTeam = dck.slice(3, 6).map(c => ({...c, hp: 100}));
+            let deck = [...ROSTER].sort(() => Math.random() - 0.5);
+            state.pTeam = deck.slice(0, 3).map(c => ({...c, hp: 100}));
+            state.eTeam = deck.slice(3, 6).map(c => ({...c, hp: 100}));
             document.getElementById('setup').style.display = 'none';
             document.getElementById('game').style.display = 'block';
             render();
@@ -64,30 +64,28 @@
         function render() {
             document.getElementById('p-team').innerHTML = state.pTeam.map((c, i) => 
                 `<div class="card ${c.r} ${state.selected === i ? 'selected' : ''}" onclick="select(${i})">
-                    <strong>${c.n}</strong><div>${c.hp} HP</div>
+                    <strong>${c.n}</strong><div class="hp-badge">${c.hp} HP</div>
                 </div>`).join('');
             document.getElementById('e-team').innerHTML = state.eTeam.map((c, i) => 
                 `<div class="card ${c.r} ${state.skill ? 'target' : ''}" onclick="attack(${i})">
-                    <strong>${c.n}</strong><div>${c.hp} HP</div>
+                    <strong>${c.n}</strong><div class="hp-badge">${c.hp} HP</div>
                 </div>`).join('');
         }
 
         function select(i) {
             state.selected = i;
-            document.getElementById('status').innerText = "Choisis ton attaque";
             document.getElementById('actions').innerHTML = state.pTeam[i].s.map(sk => 
-                `<button class="btn" onclick="setSkill('${sk.n}', ${sk.d})">${sk.n} (${sk.d})</button>`).join('');
+                `<button class="btn" onclick="setSkill('${sk.n}', ${sk.d})">${sk.n}</button>`).join('');
             render();
         }
 
-        function setSkill(name, dmg) { state.skill = {name, dmg}; document.getElementById('status').innerText = "Cible un ennemi !"; }
+        function setSkill(n, d) { state.skill = {n, d}; document.getElementById('status').innerText = "Cible un ennemi !"; }
 
         function attack(i) {
             if(!state.skill) return;
-            state.eTeam[i].hp = Math.max(0, state.eTeam[i].hp - state.skill.dmg);
+            state.eTeam[i].hp = Math.max(0, state.eTeam[i].hp - state.skill.d);
             state.selected = null; state.skill = null;
             document.getElementById('actions').innerHTML = "";
-            document.getElementById('status').innerText = "Attaque lancée !";
             render();
             setTimeout(aiMove, 800);
         }
