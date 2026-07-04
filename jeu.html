@@ -3,102 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HOL Battle Arena</title>
+    <title>HOL Battle Arena - Final</title>
     <style>
         body { background-color: #121212; color: white; display: flex; justify-content: center; min-height: 100vh; margin: 0; font-family: sans-serif; padding: 20px; box-sizing: border-box; }
         .container { width: 100%; max-width: 500px; text-align: center; }
+        h1 { margin-bottom: 25px; font-size: 1.8rem; }
         
-        h1 { margin-bottom: 30px; font-size: 2rem; }
-        .character-card { display: block; width: 100%; margin-bottom: 15px; padding: 20px; background: #1a1a1a; border: 1px solid #9146ff; color: white; border-radius: 8px; cursor: pointer; font-size: 1.1rem; transition: 0.2s; }
+        /* Boutons de sélection avec rôle */
+        .character-card { display: block; width: 100%; margin-bottom: 12px; padding: 15px; background: #1a1a1a; border: 1px solid #9146ff; color: white; border-radius: 8px; cursor: pointer; }
         .character-card:hover { background: #9146ff; }
+        .role-text { display: block; font-size: 0.85rem; color: #b1b1b1; margin-top: 4px; }
 
-        .health-bar-bg { background: #333; height: 20px; border-radius: 10px; margin: 10px 0; overflow: hidden; }
-        .health-fill { height: 100%; background: #9146ff; width: 100%; transition: width 0.3s; border-radius: 10px; }
-        .hp-text { font-size: 0.9rem; margin-top: 5px; color: #ccc; }
+        .health-bar-bg { background: #333; height: 18px; border-radius: 10px; margin: 8px 0; overflow: hidden; }
+        .health-fill { height: 100%; background: #9146ff; width: 100%; transition: width 0.3s; }
         
-        .action-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 20px; }
-        .skill { padding: 15px 10px; background: #1a1a1a; border: 1px solid #9146ff; color: white; border-radius: 8px; cursor: pointer; font-size: 0.85rem; line-height: 1.3; transition: 0.2s; }
+        .action-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
+        .skill { padding: 12px 8px; background: #1a1a1a; border: 1px solid #9146ff; color: white; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
         .skill:hover:not(:disabled) { background: #9146ff; }
-        .skill:disabled { background: #222; border-color: #555; color: #777; cursor: not-allowed; }
+        .skill:disabled { background: #222; border-color: #444; color: #666; cursor: not-allowed; }
 
-        /* Log de combat épuré */
-        #log { margin: 25px 0; font-weight: bold; color: #fff; font-size: 1.1rem; line-height: 1.6; min-height: 70px; padding: 10px; border-top: 1px solid #333; border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: center; }
+        /* Log de combat propre */
+        #log { margin: 20px 0; padding: 15px; background: #000; border: 1px solid #9146ff; border-radius: 8px; font-weight: bold; color: #fff; font-size: 1.05rem; line-height: 1.5; min-height: 50px; }
 
-        .btn-layout { display: none; margin-top: 25px; gap: 15px; justify-content: center; }
-        .btn-replay { padding: 14px 24px; background: #9146ff; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1rem; font-weight: bold; }
-        .btn-home { padding: 14px 24px; background: #222; color: white; border: 1px solid #555; border-radius: 8px; cursor: pointer; font-size: 1.1rem; font-weight: bold; }
-        
-        #end-title { font-size: 2rem; font-weight: bold; margin-top: 20px; display: none; }
+        .btn-end { padding: 15px 30px; background: #9146ff; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1rem; font-weight: bold; margin: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="container" id="selection-screen">
+    <div class="container" id="screen-select">
         <h1>Choisis ton héros</h1>
         <div id="roster"></div>
-        <button class="btn-home" onclick="goToMainMenu()" style="width: 100%; margin-top: 20px;">Accueil</button>
     </div>
 
-    <div class="container" id="battle-screen" style="display: none;">
-        <div style="display: flex; gap: 20px; margin-bottom: 20px;">
-            <div style="flex:1"><h3 id="p-name"></h3><div class="health-bar-bg"><div id="p-bar" class="health-fill"></div></div><div class="hp-text" id="p-hp"></div></div>
-            <div style="flex:1"><h3 id="e-name"></h3><div class="health-bar-bg"><div id="e-bar" class="health-fill" style="background: #ff4646;"></div></div><div class="hp-text" id="e-hp"></div></div>
+    <div class="container" id="screen-battle" style="display: none;">
+        <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+            <div style="flex:1"><h3 id="p-name"></h3><div class="health-bar-bg"><div id="p-bar" class="health-fill"></div></div><div id="p-hp"></div></div>
+            <div style="flex:1"><h3 id="e-name"></h3><div class="health-bar-bg"><div id="e-bar" class="health-fill" style="background: #ff4646;"></div></div><div id="e-hp"></div></div>
         </div>
-        <div id="log">Que le combat commence !</div>
+        <div id="log">Le combat commence !</div>
         <div class="action-grid" id="actions"></div>
-        <div id="end-title"></div>
-        <div id="end-actions" class="btn-layout">
-            <button class="btn-replay" onclick="backToMenu()">Rejouer</button>
-            <button class="btn-home" onclick="goToMainMenu()">Accueil</button>
+        <div id="end-area" style="display: none;">
+            <h2 id="end-title"></h2>
+            <button class="btn-end" onclick="location.reload()">Rejouer</button>
+            <button class="btn-end" style="background:#444" onclick="window.location.href='index.html'">Accueil</button>
         </div>
     </div>
 
     <script>
         const charData = {
-            "House of Laura": { hp: 150, skills: [{ name: 'Hype du Chat', dmg: 18, heal: 0, cd: 0 }, { name: 'Pause Café', dmg: 0, heal: 25, cd: 2 }, { name: 'Raid Massif', dmg: 30, heal: 0, cd: 2 }, { name: 'Soutien des Subs', dmg: 0, heal: 60, cd: 3 }, { name: 'Mod Hammer', dmg: 35, heal: 0, cd: 3 }, { name: 'Clip Viral', dmg: 0, heal: 60, cd: 4 }, { name: 'Ban Hammer', dmg: 50, heal: 0, cd: 5 }]},
-            "HOL Rozuya": { hp: 130, skills: [{ name: 'Ligne de Code', dmg: 12, heal: 0, cd: 0 }, { name: 'Corriger Bug', dmg: 0, heal: 25, cd: 1 }, { name: 'Compilation', dmg: 20, heal: 0, cd: 2 }, { name: 'Backup Serveur', dmg: 0, heal: 50, cd: 3 }, { name: 'Refactoring', dmg: 30, heal: 0, cd: 3 }, { name: 'Patch Sécurité', dmg: 0, heal: 70, cd: 4 }, { name: 'Kernel Panic', dmg: 45, heal: 0, cd: 5 }]},
-            "HOL Tony": { hp: 190, skills: [{ name: 'Coup de Poing', dmg: 18, heal: 0, cd: 0 }, { name: 'Boisson Énergie', dmg: 0, heal: 15, cd: 1 }, { name: 'Tacle Glissé', dmg: 30, heal: 0, cd: 2 }, { name: 'Second Souffle', dmg: 0, heal: 35, cd: 3 }, { name: 'Mur de Bouclier', dmg: 0, heal: 20, cd: 2 }, { name: 'Charge de Force', dmg: 40, heal: 0, cd: 4 }, { name: 'Colosse Déchaîné', dmg: 60, heal: 0, cd: 6 }]},
-            "HOL Omass": { hp: 160, skills: [{ name: 'Tir Précis', dmg: 20, heal: 0, cd: 0 }, { name: 'Pansement Rapide', dmg: 0, heal: 10, cd: 1 }, { name: 'Balle Perçante', dmg: 35, heal: 0, cd: 2 }, { name: 'Trousse de Soin', dmg: 0, heal: 30, cd: 3 }, { name: 'Grenade Flash', dmg: 25, heal: 0, cd: 3 }, { name: 'Concentration', dmg: 45, heal: 0, cd: 4 }, { name: 'Frappe Aérienne', dmg: 70, heal: 0, cd: 6 }]},
-            "K974YT": { hp: 140, skills: [{ name: 'Clic Droit', dmg: 22, heal: 0, cd: 0 }, { name: 'Soin Manette', dmg: 0, heal: 12, cd: 1 }, { name: 'Coup Critique', dmg: 38, heal: 0, cd: 2 }, { name: 'Heal de Zone', dmg: 0, heal: 25, cd: 3 }, { name: 'Dash Offensif', dmg: 30, heal: 0, cd: 2 }, { name: 'Combo Rapide', dmg: 40, heal: 0, cd: 4 }, { name: 'Explosion Finale', dmg: 65, heal: 0, cd: 6 }]},
-            "Dark MortelCygne": { hp: 120, skills: [{ name: 'Plume Noire', dmg: 18, heal: 0, cd: 0 }, { name: 'Saignée', dmg: 25, heal: 10, cd: 1 }, { name: 'Griffes du Néant', dmg: 35, heal: 0, cd: 2 }, { name: 'Festin Sanguin', dmg: 15, heal: 40, cd: 3 }, { name: 'Forme d\'Ombre', dmg: 10, heal: 20, cd: 2 }, { name: 'Pluie de Plumes', dmg: 45, heal: 0, cd: 4 }, { name: 'Étreinte Mortelle', dmg: 80, heal: -20, cd: 7 }]}
+            "House of Laura": { role: "Équilibré", hp: 150, skills: [{name:'Hype', dmg: 20, heal: 0, cd: 0}, {name:'Pause Café', dmg: 0, heal: 30, cd: 2}, {name:'Raid', dmg: 40, heal: 0, cd: 2}, {name:'Soutien', dmg: 0, heal: 60, cd: 3}, {name:'Ban', dmg: 60, heal: 0, cd: 4}]},
+            "HOL Rozuya": { role: "Soutien / Soigneur", hp: 130, skills: [{name:'Code', dmg: 18, heal: 0, cd: 0}, {name:'Debug', dmg: 0, heal: 30, cd: 1}, {name:'Compile', dmg: 35, heal: 0, cd: 2}, {name:'Backup', dmg: 0, heal: 60, cd: 3}, {name:'Panic', dmg: 55, heal: 0, cd: 4}]},
+            "HOL Tony": { role: "Tank / Force", hp: 190, skills: [{name:'Poing', dmg: 20, heal: 0, cd: 0}, {name:'Boisson', dmg: 0, heal: 20, cd: 1}, {name:'Tacle', dmg: 35, heal: 0, cd: 2}, {name:'Souffle', dmg: 0, heal: 40, cd: 3}, {name:'Colosse', dmg: 70, heal: 0, cd: 5}]},
+            "HOL Omass": { role: "Offensif", hp: 160, skills: [{name:'Tir', dmg: 22, heal: 0, cd: 0}, {name:'Pansement', dmg: 0, heal: 15, cd: 1}, {name:'Perçant', dmg: 40, heal: 0, cd: 2}, {name:'Trousse', dmg: 0, heal: 40, cd: 3}, {name:'Aérien', dmg: 75, heal: 0, cd: 5}]},
+            "K974YT": { role: "Assassin / Burst", hp: 140, skills: [{name:'Clic', dmg: 25, heal: 0, cd: 0}, {name:'Manette', dmg: 0, heal: 20, cd: 1}, {name:'Critique', dmg: 45, heal: 0, cd: 2}, {name:'Zone', dmg: 0, heal: 30, cd: 3}, {name:'Explosion', dmg: 70, heal: 0, cd: 5}]},
+            "Dark MortelCygne": { role: "Vampire (Agressif)", hp: 125, skills: [{name:'Plume', dmg: 25, heal: 0, cd: 0}, {name:'Saignée', dmg: 35, heal: 0, cd: 1}, {name:'Griffes', dmg: 45, heal: 0, cd: 2}, {name:'Festin', dmg: 20, heal: 15, cd: 3}, {name:'Pluie', dmg: 60, heal: 0, cd: 4}, {name:'Étreinte', dmg: 90, heal: 0, cd: 6}]}
         };
 
-        let playerName, enemyName, pHP, eHP, pMaxHP, eMaxHP, pSkills, eSkills, pCurrentCooldowns = [], eCurrentCooldowns = [], gameActive = true;
+        let pName, eName, pHP, eHP, pMax, eMax, pSkills, eSkills, pCD, eCD, active = true;
 
         function start(name) {
-            playerName = name;
-            let available = Object.keys(charData).filter(h => h !== playerName);
-            enemyName = available[Math.floor(Math.random() * available.length)];
-            
-            pHP = pMaxHP = charData[playerName].hp;
-            eHP = eMaxHP = charData[enemyName].hp;
-            pSkills = charData[playerName].skills;
-            eSkills = charData[enemyName].skills;
-            pCurrentCooldowns = new Array(pSkills.length).fill(0);
-            eCurrentCooldowns = new Array(eSkills.length).fill(0);
-            gameActive = true;
-
-            document.getElementById('selection-screen').style.display = 'none';
-            document.getElementById('battle-screen').style.display = 'block';
-            document.getElementById('p-name').innerText = playerName;
-            document.getElementById('e-name').innerText = enemyName;
-            document.getElementById('end-title').style.display = 'none';
-            document.getElementById('end-actions').style.display = 'none';
-            document.getElementById('actions').style.display = 'grid';
-            
+            pName = name;
+            let others = Object.keys(charData).filter(n => n !== name);
+            eName = others[Math.floor(Math.random() * others.length)];
+            pMax = pHP = charData[pName].hp;
+            eMax = eHP = charData[eName].hp;
+            pSkills = charData[pName].skills;
+            eSkills = charData[eName].skills;
+            pCD = new Array(pSkills.length).fill(0);
+            eCD = new Array(eSkills.length).fill(0);
+            document.getElementById('screen-select').style.display = 'none';
+            document.getElementById('screen-battle').style.display = 'block';
+            document.getElementById('p-name').innerText = pName;
+            document.getElementById('e-name').innerText = eName;
             updateUI();
-            updateHealthBars();
         }
 
         function updateUI() {
+            document.getElementById('p-hp').innerText = `${pHP}/${pMax} PV`;
+            document.getElementById('e-hp').innerText = `${eHP}/${eMax} PV`;
+            document.getElementById('p-bar').style.width = (pHP/pMax)*100 + '%';
+            document.getElementById('e-bar').style.width = (eHP/eMax)*100 + '%';
+            
             const actions = document.getElementById('actions');
             actions.innerHTML = '';
             pSkills.forEach((s, i) => {
                 let btn = document.createElement('button');
                 btn.className = 'skill';
-                let effect = s.dmg > 0 && s.heal > 0 ? `${s.dmg} Dmg / ${s.heal} Soin` : s.dmg > 0 ? `${s.dmg} Dmg` : `${s.heal} Soin`;
-                btn.innerHTML = `<b>${s.name}</b><br>${effect}<br>${pCurrentCooldowns[i] > 0 ? 'CD: ' + pCurrentCooldowns[i] : 'Prêt'}`;
-                btn.disabled = pCurrentCooldowns[i] > 0 || !gameActive;
+                let label = s.dmg > 0 ? `${s.dmg} Dmg` : `${s.heal} Soin`;
+                if(s.dmg > 0 && s.heal > 0) label = `${s.dmg} Dmg / ${s.heal} Soin`;
+                btn.innerHTML = `<b>${s.name}</b><br>${label}<br>${pCD[i] > 0 ? 'CD: ' + pCD[i] : 'Prêt'}`;
+                btn.disabled = pCD[i] > 0 || !active;
                 btn.onclick = () => play(i);
                 actions.appendChild(btn);
             });
@@ -106,61 +100,45 @@
 
         function play(i) {
             let s = pSkills[i];
-            let log = `${playerName} utilise <b>${s.name}</b> ! `;
-            if(s.dmg > 0) { eHP -= s.dmg; log += `Il inflige ${s.dmg} Dmg. `; }
-            if(s.heal > 0) { pHP = Math.min(pMaxHP, pHP + s.heal); log += `Il récupère ${s.heal} PV. `; }
-            
-            pCurrentCooldowns[i] = s.cd;
-            pCurrentCooldowns = pCurrentCooldowns.map(x => Math.max(0, x - 1));
-            
-            document.getElementById('log').innerHTML = log;
-            updateHealthBars();
+            let msg = `${pName} utilise <b>${s.name}</b> ! `;
+            if(s.dmg > 0) { eHP -= s.dmg; msg += `Il inflige ${s.dmg} Dégâts. `; }
+            if(s.heal > 0) { pHP = Math.min(pMax, pHP + s.heal); msg += `Il récupère ${s.heal} PV. `; }
+            pCD[i] = s.cd;
+            pCD = pCD.map(x => Math.max(0, x - 1));
+            document.getElementById('log').innerHTML = msg;
+            updateUI();
             if(eHP <= 0) endGame(true);
-            else setTimeout(enemyTurn, 1200);
+            else setTimeout(enemyTurn, 1000);
         }
 
         function enemyTurn() {
-            let i = eSkills.findIndex((s, idx) => eCurrentCooldowns[idx] === 0);
+            if(!active) return;
+            let i = eSkills.findIndex((s, idx) => eCD[idx] === 0);
+            if(i === -1) i = 0;
             let s = eSkills[i];
-            let log = `${enemyName} utilise <b>${s.name}</b> ! `;
-            if(s.dmg > 0) { pHP -= s.dmg; log += `Il inflige ${s.dmg} Dmg. `; }
-            if(s.heal > 0) { eHP = Math.min(eMaxHP, eHP + s.heal); log += `Il récupère ${s.heal} PV. `; }
-            
-            eCurrentCooldowns[i] = s.cd;
-            eCurrentCooldowns = eCurrentCooldowns.map(x => Math.max(0, x - 1));
-            
-            document.getElementById('log').innerHTML = log;
-            updateHealthBars();
+            let msg = `${eName} utilise <b>${s.name}</b> ! `;
+            if(s.dmg > 0) { pHP -= s.dmg; msg += `Il inflige ${s.dmg} Dégâts. `; }
+            if(s.heal > 0) { eHP = Math.min(eMax, eHP + s.heal); msg += `Il récupère ${s.heal} PV. `; }
+            eCD[i] = s.cd;
+            eCD = eCD.map(x => Math.max(0, x - 1));
+            document.getElementById('log').innerHTML = msg;
+            updateUI();
             if(pHP <= 0) endGame(false);
-            else updateUI();
         }
 
-        function updateHealthBars() {
-            document.getElementById('p-hp').innerText = `${pHP}/${pMaxHP}`;
-            document.getElementById('e-hp').innerText = `${eHP}/${eMaxHP}`;
-            document.getElementById('p-bar').style.width = (pHP/pMaxHP)*100 + '%';
-            document.getElementById('e-bar').style.width = (eHP/eMaxHP)*100 + '%';
-        }
-
-        function endGame(v) {
-            gameActive = false;
+        function endGame(win) {
+            active = false;
             document.getElementById('actions').style.display = 'none';
-            document.getElementById('end-title').style.display = 'block';
-            document.getElementById('end-title').innerText = v ? "VICTOIRE !" : "DÉFAITE...";
-            document.getElementById('end-actions').style.display = 'flex';
+            document.getElementById('end-area').style.display = 'block';
+            document.getElementById('end-title').innerText = win ? "VICTOIRE !" : "DÉFAITE...";
         }
 
-        function backToMenu() { location.reload(); }
-        function goToMainMenu() { window.location.href = 'index.html'; }
-        
-        // Initialisation
-        const roster = document.getElementById('roster');
-        Object.keys(charData).forEach(name => {
-            let btn = document.createElement('button');
-            btn.className = 'character-card';
-            btn.innerText = name;
-            btn.onclick = () => start(name);
-            roster.appendChild(btn);
+        Object.entries(charData).forEach(([name, data]) => {
+            let b = document.createElement('button');
+            b.className = 'character-card';
+            b.innerHTML = `<strong>${name}</strong><span class="role-text">${data.role}</span>`;
+            b.onclick = () => start(name);
+            document.getElementById('roster').appendChild(b);
         });
     </script>
 </body>
