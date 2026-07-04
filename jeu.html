@@ -3,41 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HOL Battle Game - Combat</title>
-    <link rel="stylesheet" href="style.css">
+    <title>HOL Battle Game</title>
     <style>
-        /* Optimisation mobile & visuelle */
+        body { background-color: #121212; color: white; font-family: sans-serif; margin: 0; padding: 20px; }
         button:disabled { opacity: 0.5; cursor: not-allowed; border-color: #444 !important; }
         .action-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 20px; }
         .skill { padding: 15px; background: #1a1a1a; border: 1px solid #9146ff; color: white; border-radius: 8px; cursor: pointer; transition: 0.2s; }
         .skill:hover:not(:disabled) { background: #9146ff; }
         .character-card { background: #1a1a1a; border: 1px solid #9146ff; padding: 20px; border-radius: 8px; cursor: pointer; color: white; transition: 0.2s; text-align: center; }
         .character-card:hover { background: #9146ff; }
+        .health-bar-bg { background: #333; height: 20px; border-radius: 5px; overflow: hidden; margin: 5px; }
+        .health-fill { height: 100%; transition: width 0.5s; }
     </style>
 </head>
 <body>
 
     <div class="container" id="selection-screen">
-        <h1>Choisis ton héros</h1>
+        <h1 style="text-align: center;">Choisis ton héros</h1>
         <div class="roster" id="roster" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px;"></div>
     </div>
 
     <div class="container" id="battle-screen" style="display: none;">
-        <div class="arena" style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-            <div style="flex: 1;"><h3 id="p-name">Joueur</h3><div class="health-bar-bg"><div id="p-bar" class="health-fill" style="background: #9146ff; height: 20px; width: 100%;"></div></div><p id="p-hp">0/0</p></div>
-            <div style="flex: 1;"><h3 id="e-name">Ennemi</h3><div class="health-bar-bg"><div id="e-bar" class="health-fill" style="background: #ff4646; height: 20px; width: 100%;"></div></div><p id="e-hp">0/0</p></div>
+        <!-- Design calqué sur 1000036399_3.jpg -->
+        <div class="arena" style="text-align: center; max-width: 500px; margin: auto;">
+            <div style="display: flex; gap: 10px;">
+                <h3 style="flex: 1;" id="p-name"></h3>
+                <h3 style="flex: 1;" id="e-name"></h3>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <div class="health-bar-bg" style="flex: 1;"><div id="p-bar" class="health-fill" style="background: #9146ff; width: 100%;"></div></div>
+                <div class="health-bar-bg" style="flex: 1;"><div id="e-bar" class="health-fill" style="background: #9146ff; width: 100%;"></div></div>
+            </div>
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; font-weight: bold;">
+                <p style="flex: 1;" id="p-hp">0/0</p>
+                <p style="flex: 1;" id="e-hp">0/0</p>
+            </div>
         </div>
         
-        <div id="log" style="text-align: center; min-height: 25px; margin-bottom: 15px; font-weight: bold; color: #9146ff; font-size: 1.1rem;">Que le combat commence !</div>
+        <div id="log" style="text-align: center; margin-bottom: 15px; font-weight: bold; color: #9146ff; font-size: 1.1rem;">Que le combat commence !</div>
 
         <div class="action-grid" id="actions">
             <button class="skill" id="s-basic" onclick="play('basic')"></button>
             <button class="skill" id="s-heal" onclick="play('heal')"></button>
             <button class="skill" id="s-brise" onclick="play('brise')"></button>
             <button class="skill" id="s-bigHeal" onclick="play('bigHeal')"></button>
-            <button class="skill" id="s-stun" onclick="play('stun')"></button>
-            <button class="skill" id="s-toxic" onclick="play('toxic')"></button>
-            <button class="skill" id="s-ulti" onclick="play('ulti')"></button>
         </div>
     </div>
 
@@ -49,66 +58,23 @@
     </div>
 
     <script>
-        const diff = localStorage.getItem('diff') || 'normal';
+        const diff = 'normal';
         let pHP, eHP, pMaxHP, eMaxHP, active = true;
         let playerName, enemyName;
         let pSkills = {}, eSkills = {};
         
-        // --- BASE DES COMPÉTENCES ---
         const charData = {
             "House of Laura": { hp: 150, role: "Équilibré", skills: {
                 'basic': { name: 'Hype du Chat', dmg: 18, heal: 0, cd: 0 },
                 'heal': { name: 'Pause Café', dmg: 0, heal: 25, cd: 2 },
                 'brise': { name: 'Raid Massif', dmg: 30, heal: 0, cd: 2 },
-                'bigHeal': { name: 'Soutien des Subs', dmg: 0, heal: 60, cd: 3 },
-                'stun': { name: 'Bannissement', dmg: 12, heal: 0, cd: 3 },
-                'toxic': { name: 'Drama', dmg: 20, heal: 0, cd: 3 },
-                'ulti': { name: 'Fin de Live !', dmg: 50, heal: 0, cd: 5 }
-            }},
-            "HOL Rozuya": { hp: 130, role: "Soutien", skills: {
-                'basic': { name: 'Ligne de Code', dmg: 15, heal: 0, cd: 0 },
-                'heal': { name: 'Corriger Bug', dmg: 0, heal: 35, cd: 1 },
-                'brise': { name: 'Compilation', dmg: 20, heal: 0, cd: 2 },
-                'bigHeal': { name: 'Backup Serveur', dmg: 0, heal: 80, cd: 3 },
-                'stun': { name: 'Écran Bleu', dmg: 15, heal: 0, cd: 2 },
-                'toxic': { name: 'Faille Critique', dmg: 25, heal: 0, cd: 3 },
-                'ulti': { name: 'Grosse M.A.J', dmg: 40, heal: 20, cd: 5 }
-            }},
-            "HOL Tony": { hp: 190, role: "Tank", skills: {
-                'basic': { name: 'Coup de Poing', dmg: 20, heal: 0, cd: 0 },
-                'heal': { name: 'Boisson Énergie', dmg: 0, heal: 20, cd: 2 },
-                'brise': { name: 'Tacle Glissé', dmg: 35, heal: 0, cd: 2 },
-                'bigHeal': { name: 'Second Souffle', dmg: 0, heal: 50, cd: 3 },
-                'stun': { name: 'Coup Bas', dmg: 15, heal: 0, cd: 3 },
-                'toxic': { name: 'Provocation', dmg: 25, heal: 0, cd: 3 },
-                'ulti': { name: 'Combo Furieux', dmg: 60, heal: 0, cd: 6 }
-            }},
-            "HOL Omass": { hp: 160, role: "Offensif", skills: {
-                'basic': { name: 'Tir Précis', dmg: 22, heal: 0, cd: 0 },
-                'heal': { name: 'Pansement', dmg: 0, heal: 15, cd: 2 },
-                'brise': { name: 'Balle Perçante', dmg: 40, heal: 0, cd: 2 },
-                'bigHeal': { name: 'Trousse de Soin', dmg: 0, heal: 40, cd: 3 },
-                'stun': { name: 'Grenade Flash', dmg: 20, heal: 0, cd: 3 },
-                'toxic': { name: 'Gaz Toxique', dmg: 30, heal: 0, cd: 3 },
-                'ulti': { name: 'Frappe Orbitale', dmg: 60, heal: 0, cd: 5 }
-            }},
-            "K974YT": { hp: 140, role: "Assassin", skills: {
-                'basic': { name: 'Clic Droit', dmg: 20, heal: 0, cd: 0 },
-                'heal': { name: 'Soin Manette', dmg: 0, heal: 20, cd: 2 },
-                'brise': { name: 'Coup Critique', dmg: 35, heal: 0, cd: 2 },
-                'bigHeal': { name: 'Heal de Zone', dmg: 0, heal: 50, cd: 3 },
-                'stun': { name: 'Gros Lagg', dmg: 25, heal: 0, cd: 3 },
-                'toxic': { name: 'Commu Ranked', dmg: 20, heal: 0, cd: 2 },
-                'ulti': { name: 'Gros Tryhard', dmg: 55, heal: 0, cd: 5 }
+                'bigHeal': { name: 'Soutien des Subs', dmg: 0, heal: 60, cd: 3 }
             }},
             "Dark MortelCygne": { hp: 120, role: "Vampire", skills: {
                 'basic': { name: 'Plume Noire', dmg: 16, heal: 0, cd: 0 },
-                'heal': { name: 'Vol de Vie', dmg: 20, heal: 20, cd: 2 },
+                'heal': { name: 'Vol de Vie', dmg: 40, heal: 40, cd: 2 }, /* Vol de 40 PV */
                 'brise': { name: 'Frappe Obscure', dmg: 30, heal: 0, cd: 2 },
-                'bigHeal': { name: 'Aura Ténébreuse', dmg: 0, heal: 60, cd: 3 },
-                'stun': { name: 'Peur Bleue', dmg: 18, heal: 5, cd: 3 },
-                'toxic': { name: 'Poison Obscur', dmg: 30, heal: 0, cd: 3 },
-                'ulti': { name: 'Éclipse Totale', dmg: 45, heal: 45, cd: 5 }
+                'bigHeal': { name: 'Aura Ténébreuse', dmg: 0, heal: 60, cd: 3 }
             }}
         };
 
@@ -117,17 +83,10 @@
             let hero = charData[n];
             let d = document.createElement('button');
             d.className = 'character-card';
-            d.innerHTML = `<div style="color: white; font-weight: bold; font-size: 1.1rem;">${n}</div><div style="font-size: 0.8rem; color: #9146ff; margin-top: 5px;">${hero.role}</div>`;
+            d.innerHTML = `<strong>${n}</strong>`;
             d.onclick = () => start(n);
             document.getElementById('roster').appendChild(d);
         });
-
-        function isSkillAllowed(k) {
-            if(diff === 'facile') return k === 'basic' || k === 'heal';
-            if(diff === 'normal') return ['basic','heal','brise','bigHeal'].includes(k);
-            if(diff === 'difficile') return ['basic','heal','brise','bigHeal','stun','toxic'].includes(k);
-            return true;
-        }
 
         function start(name) {
             playerName = name;
@@ -140,14 +99,10 @@
             document.getElementById('p-name').innerText = playerName;
             document.getElementById('e-name').innerText = enemyName;
             
-            for(let k in charData[playerName].skills) {
-                pSkills[k] = {...charData[playerName].skills[k], cdCurrent: 0};
-                let btn = document.getElementById('s-'+k);
-                if(btn && !isSkillAllowed(k)) btn.style.display = 'none';
-            }
-            for(let k in charData[enemyName].skills) {
-                eSkills[k] = {...charData[enemyName].skills[k], cdCurrent: 0};
-            }
+            pSkills = JSON.parse(JSON.stringify(charData[playerName].skills));
+            eSkills = JSON.parse(JSON.stringify(charData[enemyName].skills));
+            for(let k in pSkills) pSkills[k].cdCurrent = 0;
+            for(let k in eSkills) eSkills[k].cdCurrent = 0;
             updateUI();
         }
 
@@ -156,7 +111,6 @@
             executeMove(action, true);
             if(eHP > 0) { 
                 active = false; 
-                updateUI();
                 setTimeout(iaTurn, 1000); 
             }
         }
@@ -182,7 +136,7 @@
         }
 
         function iaTurn() {
-            let valid = Object.keys(eSkills).filter(k => eSkills[k].cdCurrent === 0 && isSkillAllowed(k));
+            let valid = Object.keys(eSkills).filter(k => eSkills[k].cdCurrent === 0);
             let move = valid[Math.floor(Math.random() * valid.length)];
             executeMove(move, false);
             for(let k in pSkills) if(pSkills[k].cdCurrent > 0) pSkills[k].cdCurrent--;
@@ -201,18 +155,11 @@
                 if(btn) {
                     let s = pSkills[k];
                     btn.disabled = !active || s.cdCurrent > 0;
-                    if(s.cdCurrent > 0) {
-                        btn.innerHTML = `<strong>${s.name}</strong><br><small>Recharge: ${s.cdCurrent}</small>`;
-                    } else {
-                        let desc = "";
-                        if(s.dmg > 0) desc += s.dmg + " Dmg ";
-                        if(s.heal > 0) desc += (s.dmg > 0 ? "+ " : "") + s.heal + " PV ";
-                        btn.innerHTML = `<strong>${s.name}</strong><br><small>${desc}(${s.cd} CD)</small>`;
-                    }
+                    let cdText = s.cdCurrent > 0 ? `(${s.cdCurrent} CD)` : `(${s.cd} CD)`;
+                    btn.innerHTML = `<strong>${s.name}</strong><br><small>${s.dmg > 0 ? s.dmg+' Dmg ' : ''}${s.heal > 0 ? '+'+s.heal+' PV ' : ''}${cdText}</small>`;
                 }
             }
         }
     </script>
 </body>
 </html>
-
