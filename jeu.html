@@ -13,20 +13,20 @@
         <!-- Haut de l'arène : Noms, Barres et PV -->
         <div style="display: flex; gap: 20px; margin-bottom: 30px;">
             <div style="flex: 1; text-align: center;">
-                <div id="p-name" style="font-weight: bold; font-size: 1.1rem; margin-bottom: 10px;"></div>
+                <div id="p-name" style="font-weight: bold; font-size: 1.1rem; margin-bottom: 10px; min-height: 24px;"></div>
                 <div class="health-bar"><div id="p-bar" class="bar"></div></div>
-                <div id="p-hp" style="margin-top: 8px; font-size: 0.95rem; color: #ddd;"></div>
+                <div id="p-hp" style="margin-top: 8px; font-size: 0.95rem; color: #ddd; min-height: 20px;"></div>
             </div>
 
             <div style="flex: 1; text-align: center;">
-                <div id="e-name" style="font-weight: bold; font-size: 1.1rem; margin-bottom: 10px;"></div>
+                <div id="e-name" style="font-weight: bold; font-size: 1.1rem; margin-bottom: 10px; min-height: 24px;"></div>
                 <div class="health-bar"><div id="e-bar" class="bar" style="background: #ff4646;"></div></div>
-                <div id="e-hp" style="margin-top: 8px; font-size: 0.95rem; color: #ddd;"></div>
+                <div id="e-hp" style="margin-top: 8px; font-size: 0.95rem; color: #ddd; min-height: 20px;"></div>
             </div>
         </div>
 
         <!-- Texte central -->
-        <h2 id="log" style="font-size: 1.1rem; margin: 25px 0; text-align: center;">Que le combat commence !</h2>
+        <h2 id="log" style="font-size: 1.1rem; margin: 25px 0; text-align: center; color: #9146ff;">Que le combat commence !</h2>
 
         <!-- Grille des compétences (2x2) -->
         <div id="actions" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;"></div>
@@ -52,11 +52,18 @@
             "Dark MortelCygne": {hp:220, skills:[{n:'Ombre',d:25},{n:'Plume',d:30},{n:'Griffe',d:40},{n:'Night',d:50},{n:'Black',d:60},{n:'Étreinte',d:80},{n:'Soul',d:90}]}
         };
 
-        const pName = localStorage.getItem('char') || "House of Laura";
-        const diff = parseInt(localStorage.getItem('diff')) || 4;
+        // --- CORRECTION DU BUG ICI ---
+        // Le code vérifie si la mémoire du navigateur est corrompue et la répare si besoin
+        let pName = localStorage.getItem('char');
+        if (!chars[pName]) { pName = "House of Laura"; } 
+
+        let diff = parseInt(localStorage.getItem('diff'));
+        if (isNaN(diff)) { diff = 4; }
+        // -----------------------------
         
         const charNames = Object.keys(chars);
-        const eName = charNames.filter(n => n !== pName)[Math.floor(Math.random() * (charNames.length - 1))];
+        const availableEnemies = charNames.filter(n => n !== pName);
+        const eName = availableEnemies[Math.floor(Math.random() * availableEnemies.length)];
         
         let pMax = chars[pName].hp, eMax = chars[eName].hp;
         let pHP = pMax, eHP = eMax;
@@ -74,12 +81,17 @@
             document.getElementById('e-bar').style.width = (eHP / eMax * 100) + "%";
         }
 
+        // Création de la grille de boutons
         pS.forEach((s, i) => {
             let b = document.createElement('button');
             b.className = 'btn';
             b.style.margin = "0"; 
             b.style.padding = "15px 5px";
-            b.innerHTML = `<strong>${s.n}</strong><br><small style="color:#aaa;">${s.d} Dmg</small>`;
+            b.style.display = "flex";
+            b.style.flexDirection = "column";
+            b.style.alignItems = "center";
+            b.style.justifyContent = "center";
+            b.innerHTML = `<strong style="margin-bottom: 5px;">${s.n}</strong><small style="color:#aaa;">${s.d} Dmg</small>`;
             b.onclick = () => play(i);
             document.getElementById('actions').appendChild(b);
         });
