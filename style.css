@@ -1,139 +1,41 @@
-/* --- BASE & RESPONSIVE --- */
-* {
-    box-sizing: border-box; /* Évite que les marges cassent l'écran sur mobile */
-}
-
-body { 
-    background: #0e0e10; 
-    color: white; 
-    font-family: sans-serif; 
-    margin: 0; 
-    min-height: 100vh; 
-    display: flex; 
-    justify-content: center; 
-    align-items: center; 
-    flex-direction: column;
-    padding: 15px; /* Marge pour ne pas coller aux bords du téléphone */
-}
-
-.container { 
-    width: 100%; /* S'adapte à la largeur du téléphone */
-    max-width: 500px; /* Ne devient pas trop large sur PC */
-    background: #1f1f23; 
-    padding: 20px; 
-    border-radius: 12px; 
+/* Style global pour les cartes */
+.character-card {
+    background: #2a2a2a; /* Fond de base gris foncé */
+    color: white;
+    padding: 15px;
+    border: 2px solid #333; /* Bordure discrète par défaut */
+    border-radius: 10px;
+    cursor: pointer;
     text-align: center;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    transition: all 0.2s ease; /* Transition douce */
+    margin: 5px;
+    width: 200px;
 }
 
-h1, h2, h3 { margin-top: 0; }
-
-/* --- BOUTONS GLOBAUX --- */
-.btn-main, .btn-game { 
-    display: block; 
-    width: 100%; 
-    margin: 10px 0; 
-    padding: 15px; 
-    border: none; 
-    border-radius: 6px; 
-    color: white; 
-    font-weight: bold; 
-    font-size: 1.1rem;
-    cursor: pointer; 
-    background: #3a3a3c;
-    transition: background 0.2s;
-}
-.btn-main:hover, .btn-game:hover { background: #9146ff; }
-.btn-play { background: #9146ff; }
-.btn-home { background: #4a4a4c; }
-
-/* --- SELECTION DES HEROS --- */
-.roster { 
-    display: grid; 
-    grid-template-columns: repeat(2, 1fr); 
-    gap: 10px; 
-    margin-top: 15px; 
-}
-.character-card { 
-    background: #3a3a3c; 
-    padding: 15px 5px; 
-    border-radius: 6px; 
-    cursor: pointer; 
-    font-weight: bold;
-    font-size: 0.9rem;
-}
-.character-card:hover { background: #9146ff; }
-
-/* --- ARENE DE COMBAT --- */
-.arena { 
-    display: flex; 
-    justify-content: space-between; 
-    margin-bottom: 20px; 
-    gap: 15px;
-}
-.arena > div {
-    flex: 1; /* Chaque barre de vie prend la moitié de la place */
-}
-.health-bar-bg { 
-    width: 100%; 
-    background: #000; 
-    height: 15px; 
-    border-radius: 5px; 
-    margin: 5px 0;
-    overflow: hidden;
-}
-.health-fill { 
-    height: 100%; 
-    background: #2ecc71; 
-    width: 100%; 
-    transition: width 0.3s ease; 
+/* L'effet au survol : on change juste le gris et on ajoute une bordure violette */
+.character-card:hover {
+    background: #444; /* Gris plus clair au survol */
+    border: 2px solid #9146ff; /* La bordure devient violette */
+    transform: scale(1.05); /* Petit effet de zoom */
 }
 
-#log { 
-    height: 80px; 
-    background: #000; 
-    padding: 10px; 
-    margin-bottom: 15px; 
-    border-radius: 6px; 
-    overflow-y: auto; 
-    font-size: 0.85rem; 
-    border: 1px solid #333; 
-    text-align: left;
-}
-
-/* --- COMPETENCES --- */
-.action-grid { 
-    display: grid; 
-    grid-template-columns: repeat(2, 1fr); 
-    gap: 10px; 
-}
-#s-ulti { 
-    grid-column: span 2; /* L'ulti prend toute la largeur pour être stylé */
-    background: #7b2cbf; 
-}
-
-button.skill { 
-    padding: 12px 5px; 
-    cursor: pointer; 
-    background: #3a3a3c; 
-    color: white; 
-    border: none; 
-    border-radius: 6px; 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
+/* Assure-toi que le conteneur des cartes est bien flexible */
+.roster {
+    display: flex;
+    flex-wrap: wrap;
     justify-content: center;
-    min-height: 60px; /* Plus facile à cliquer sur mobile */
+    gap: 15px;
+    padding: 20px;
 }
-button.skill strong { font-size: 0.95rem; }
-button.skill small { font-size: 0.75rem; color: #ccc; margin-top: 4px; }
-button.skill:disabled { background: #222 !important; opacity: 0.5; cursor: not-allowed; color: #666; }
 
-#end-screen { display: none; }
+/* Styles pour le reste de ton interface */
+body {
+    background-color: #121212;
+    color: white;
+    font-family: Arial, sans-serif;
+}
 
-/* --- ADAPTATION POUR TRES PETITS TELEPHONES --- */
-@media (max-width: 360px) {
-    .roster, .action-grid { grid-template-columns: 1fr; }
-    #s-ulti { grid-column: span 1; }
-    .arena { flex-direction: column; gap: 10px; }
+.container {
+    text-align: center;
+    margin-top: 50px;
 }
