@@ -5,21 +5,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HOL Battle Game - Difficulté</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Styles spécifiques pour aligner les boutons de difficulté */
+        .difficulty-grid {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-diff {
+            padding: 10px 20px;
+            cursor: pointer;
+            background: #1e1e1e;
+            color: white;
+            border: 1px solid #333;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        
+        .btn-diff:hover {
+            background: #9146ff;
+            border-color: #9146ff;
+        }
+
+        /* Style spécifique pour le bouton Expert (Rouge) */
+        .btn-expert {
+            border-color: #ff4646;
+        }
+        .btn-expert:hover {
+            background: #ff4646;
+            border-color: #ff4646;
+        }
+    </style>
 </head>
 <body>
+
     <div class="container">
         <h1>Choix de la difficulté</h1>
-        <button class="btn-main" onclick="setDiff('facile')">Facile</button>
-        <button class="btn-main" onclick="setDiff('normal')">Normal</button>
-        <button class="btn-main" onclick="setDiff('difficile')">Difficile</button>
-        <button class="btn-main" style="background:#e74c3c" onclick="setDiff('expert')">Expert</button>
-        <button class="btn-main btn-home" onclick="location.href='index.html'">Retour à l'accueil</button>
+        
+        <div class="difficulty-grid">
+            <button class="btn-diff" onclick="setDiff('facile')">Facile</button>
+            <button class="btn-diff" onclick="setDiff('normal')">Normal</button>
+            <button class="btn-diff" onclick="setDiff('difficile')">Difficile</button>
+            <button class="btn-diff btn-expert" onclick="setDiff('expert')">Expert</button>
+            <button class="btn-diff" onclick="window.location.href='index.html'" style="background: #333;">Retour à l'accueil</button>
+        </div>
     </div>
 
     <script>
-        function setDiff(level) {
-            localStorage.setItem('diff', level);
-            location.href = 'jeu.html';
+        function setDiff(d) {
+            // Sauvegarde la difficulté choisie
+            localStorage.setItem('diff', d);
+            // Redirige vers la page de jeu
+            window.location.href = 'jeu.html';
         }
     </script>
 </body>
