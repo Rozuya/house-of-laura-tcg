@@ -17,23 +17,18 @@
         .hp-text { font-size: 0.9rem; margin-top: 5px; color: #ccc; }
         
         .action-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 20px; }
-        .skill { padding: 15px 10px; background: #1a1a1a; border: 1px solid #9146ff; color: white; border-radius: 8px; cursor: pointer; font-size: 0.9rem; line-height: 1.4; transition: 0.2s; }
+        .skill { padding: 15px 10px; background: #1a1a1a; border: 1px solid #9146ff; color: white; border-radius: 8px; cursor: pointer; font-size: 0.85rem; line-height: 1.3; transition: 0.2s; }
         .skill:hover:not(:disabled) { background: #9146ff; }
-        
         .skill:disabled { background: #222; border-color: #555; color: #777; cursor: not-allowed; }
 
-        /* Styles pour l'écran de fin */
-        .btn-layout { display: none; margin-top: 25px; gap: 15px; justify-content: center; }
-        
-        .btn-replay { padding: 14px 24px; background: #9146ff; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1rem; font-weight: bold; transition: 0.2s; }
-        .btn-replay:hover { background: #a970ff; }
+        /* Log de combat épuré */
+        #log { margin: 25px 0; font-weight: bold; color: #fff; font-size: 1.1rem; line-height: 1.6; min-height: 70px; padding: 10px; border-top: 1px solid #333; border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: center; }
 
-        .btn-home { padding: 14px 24px; background: #222; color: white; border: 1px solid #555; border-radius: 8px; cursor: pointer; font-size: 1.1rem; font-weight: bold; transition: 0.2s; }
-        .btn-home:hover { background: #333; border-color: #ff4646; }
+        .btn-layout { display: none; margin-top: 25px; gap: 15px; justify-content: center; }
+        .btn-replay { padding: 14px 24px; background: #9146ff; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1rem; font-weight: bold; }
+        .btn-home { padding: 14px 24px; background: #222; color: white; border: 1px solid #555; border-radius: 8px; cursor: pointer; font-size: 1.1rem; font-weight: bold; }
         
         #end-title { font-size: 2rem; font-weight: bold; margin-top: 20px; display: none; }
-        .victory-text { color: #4caf50; }
-        .defeat-text { color: #ff4646; }
     </style>
 </head>
 <body>
@@ -41,29 +36,17 @@
     <div class="container" id="selection-screen">
         <h1>Choisis ton héros</h1>
         <div id="roster"></div>
-        <button class="btn-home" onclick="goToMainMenu()" style="width: 100%; margin-top: 20px;">↩ Retour au Menu Principal</button>
+        <button class="btn-home" onclick="goToMainMenu()" style="width: 100%; margin-top: 20px;">Accueil</button>
     </div>
 
     <div class="container" id="battle-screen" style="display: none;">
         <div style="display: flex; gap: 20px; margin-bottom: 20px;">
-            <div style="flex:1">
-                <h3 id="p-name"></h3>
-                <div class="health-bar-bg"><div id="p-bar" class="health-fill"></div></div>
-                <div class="hp-text" id="p-hp"></div>
-            </div>
-            <div style="flex:1">
-                <h3 id="e-name"></h3>
-                <div class="health-bar-bg"><div id="e-bar" class="health-fill" style="background: #ff4646;"></div></div>
-                <div class="hp-text" id="e-hp"></div>
-            </div>
+            <div style="flex:1"><h3 id="p-name"></h3><div class="health-bar-bg"><div id="p-bar" class="health-fill"></div></div><div class="hp-text" id="p-hp"></div></div>
+            <div style="flex:1"><h3 id="e-name"></h3><div class="health-bar-bg"><div id="e-bar" class="health-fill" style="background: #ff4646;"></div></div><div class="hp-text" id="e-hp"></div></div>
         </div>
-        
-        <div id="log" style="margin: 20px 0; font-weight: bold; color: #9146ff; font-size: 1.1rem; height: 3em; display: flex; align-items: center; justify-content: center;">Que le combat commence !</div>
-        
+        <div id="log">Que le combat commence !</div>
         <div class="action-grid" id="actions"></div>
-
         <div id="end-title"></div>
-
         <div id="end-actions" class="btn-layout">
             <button class="btn-replay" onclick="backToMenu()">Rejouer</button>
             <button class="btn-home" onclick="goToMainMenu()">Accueil</button>
@@ -72,292 +55,113 @@
 
     <script>
         const charData = {
-            "House of Laura": { hp: 150, skills: [
-                { name: 'Hype du Chat', dmg: 18, heal: 0, cd: 0 },
-                { name: 'Pause Café', dmg: 0, heal: 25, cd: 2 },
-                { name: 'Raid Massif', dmg: 30, heal: 0, cd: 2 },
-                { name: 'Soutien des Subs', dmg: 0, heal: 60, cd: 3 },
-                { name: 'Mod Hammer', dmg: 35, heal: 0, cd: 3 },
-                { name: 'Clip Viral', dmg: 0, heal: 60, cd: 4 },
-                { name: 'Ban Hammer', dmg: 50, heal: 0, cd: 5 }
-            ]},
-            "HOL Rozuya": { hp: 130, skills: [
-                { name: 'Ligne de Code', dmg: 12, heal: 0, cd: 0 },
-                { name: 'Corriger Bug', dmg: 0, heal: 25, cd: 1 },
-                { name: 'Compilation', dmg: 20, heal: 0, cd: 2 },
-                { name: 'Backup Serveur', dmg: 0, heal: 50, cd: 3 },
-                { name: 'Refactoring', dmg: 30, heal: 0, cd: 3 },
-                { name: 'Patch Sécurité', dmg: 0, heal: 70, cd: 4 },
-                { name: 'Kernel Panic', dmg: 45, heal: 0, cd: 5 }
-            ]},
-            "HOL Tony": { hp: 190, skills: [
-                { name: 'Coup de Poing', dmg: 18, heal: 0, cd: 0 },
-                { name: 'Boisson Énergie', dmg: 0, heal: 15, cd: 1 },
-                { name: 'Tacle Glissé', dmg: 30, heal: 0, cd: 2 },
-                { name: 'Second Souffle', dmg: 0, heal: 35, cd: 3 },
-                { name: 'Mur de Bouclier', dmg: 0, heal: 20, cd: 2 },
-                { name: 'Charge de Force', dmg: 40, heal: 0, cd: 4 },
-                { name: 'Colosse Déchaîné', dmg: 60, heal: 0, cd: 6 }
-            ]},
-            "HOL Omass": { hp: 160, skills: [
-                { name: 'Tir Précis', dmg: 20, heal: 0, cd: 0 },
-                { name: 'Pansement Rapide', dmg: 0, heal: 10, cd: 1 },
-                { name: 'Balle Perçante', dmg: 35, heal: 0, cd: 2 },
-                { name: 'Trousse de Soin', dmg: 0, heal: 30, cd: 3 },
-                { name: 'Grenade Flash', dmg: 25, heal: 0, cd: 3 },
-                { name: 'Concentration', dmg: 45, heal: 0, cd: 4 },
-                { name: 'Frappe Aérienne', dmg: 70, heal: 0, cd: 6 }
-            ]},
-            "K974YT": { hp: 140, skills: [
-                { name: 'Clic Droit', dmg: 22, heal: 0, cd: 0 },
-                { name: 'Soin Manette', dmg: 0, heal: 12, cd: 1 },
-                { name: 'Coup Critique', dmg: 38, heal: 0, cd: 2 },
-                { name: 'Heal de Zone', dmg: 0, heal: 25, cd: 3 },
-                { name: 'Dash Offensif', dmg: 30, heal: 0, cd: 2 },
-                { name: 'Combo Rapide', dmg: 40, heal: 0, cd: 4 },
-                { name: 'Explosion Finale', dmg: 65, heal: 0, cd: 6 }
-            ]},
-            "Dark MortelCygne": { hp: 120, skills: [
-                { name: 'Plume Noire', dmg: 18, heal: 0, cd: 0 },
-                { name: 'Saignée', dmg: 25, heal: 10, cd: 1 },
-                { name: 'Griffes du Néant', dmg: 35, heal: 0, cd: 2 },
-                { name: 'Festin Sanguin', dmg: 15, heal: 40, cd: 3 },
-                { name: 'Forme d\'Ombre', dmg: 10, heal: 20, cd: 2 },
-                { name: 'Pluie de Plumes', dmg: 45, heal: 0, cd: 4 },
-                { name: 'Étreinte Mortelle', dmg: 80, heal: -20, cd: 7 }
-            ]}
+            "House of Laura": { hp: 150, skills: [{ name: 'Hype du Chat', dmg: 18, heal: 0, cd: 0 }, { name: 'Pause Café', dmg: 0, heal: 25, cd: 2 }, { name: 'Raid Massif', dmg: 30, heal: 0, cd: 2 }, { name: 'Soutien des Subs', dmg: 0, heal: 60, cd: 3 }, { name: 'Mod Hammer', dmg: 35, heal: 0, cd: 3 }, { name: 'Clip Viral', dmg: 0, heal: 60, cd: 4 }, { name: 'Ban Hammer', dmg: 50, heal: 0, cd: 5 }]},
+            "HOL Rozuya": { hp: 130, skills: [{ name: 'Ligne de Code', dmg: 12, heal: 0, cd: 0 }, { name: 'Corriger Bug', dmg: 0, heal: 25, cd: 1 }, { name: 'Compilation', dmg: 20, heal: 0, cd: 2 }, { name: 'Backup Serveur', dmg: 0, heal: 50, cd: 3 }, { name: 'Refactoring', dmg: 30, heal: 0, cd: 3 }, { name: 'Patch Sécurité', dmg: 0, heal: 70, cd: 4 }, { name: 'Kernel Panic', dmg: 45, heal: 0, cd: 5 }]},
+            "HOL Tony": { hp: 190, skills: [{ name: 'Coup de Poing', dmg: 18, heal: 0, cd: 0 }, { name: 'Boisson Énergie', dmg: 0, heal: 15, cd: 1 }, { name: 'Tacle Glissé', dmg: 30, heal: 0, cd: 2 }, { name: 'Second Souffle', dmg: 0, heal: 35, cd: 3 }, { name: 'Mur de Bouclier', dmg: 0, heal: 20, cd: 2 }, { name: 'Charge de Force', dmg: 40, heal: 0, cd: 4 }, { name: 'Colosse Déchaîné', dmg: 60, heal: 0, cd: 6 }]},
+            "HOL Omass": { hp: 160, skills: [{ name: 'Tir Précis', dmg: 20, heal: 0, cd: 0 }, { name: 'Pansement Rapide', dmg: 0, heal: 10, cd: 1 }, { name: 'Balle Perçante', dmg: 35, heal: 0, cd: 2 }, { name: 'Trousse de Soin', dmg: 0, heal: 30, cd: 3 }, { name: 'Grenade Flash', dmg: 25, heal: 0, cd: 3 }, { name: 'Concentration', dmg: 45, heal: 0, cd: 4 }, { name: 'Frappe Aérienne', dmg: 70, heal: 0, cd: 6 }]},
+            "K974YT": { hp: 140, skills: [{ name: 'Clic Droit', dmg: 22, heal: 0, cd: 0 }, { name: 'Soin Manette', dmg: 0, heal: 12, cd: 1 }, { name: 'Coup Critique', dmg: 38, heal: 0, cd: 2 }, { name: 'Heal de Zone', dmg: 0, heal: 25, cd: 3 }, { name: 'Dash Offensif', dmg: 30, heal: 0, cd: 2 }, { name: 'Combo Rapide', dmg: 40, heal: 0, cd: 4 }, { name: 'Explosion Finale', dmg: 65, heal: 0, cd: 6 }]},
+            "Dark MortelCygne": { hp: 120, skills: [{ name: 'Plume Noire', dmg: 18, heal: 0, cd: 0 }, { name: 'Saignée', dmg: 25, heal: 10, cd: 1 }, { name: 'Griffes du Néant', dmg: 35, heal: 0, cd: 2 }, { name: 'Festin Sanguin', dmg: 15, heal: 40, cd: 3 }, { name: 'Forme d\'Ombre', dmg: 10, heal: 20, cd: 2 }, { name: 'Pluie de Plumes', dmg: 45, heal: 0, cd: 4 }, { name: 'Étreinte Mortelle', dmg: 80, heal: -20, cd: 7 }]}
         };
 
-        const heroes = Object.keys(charData);
-        
-        let pHP, eHP, pMaxHP, eMaxHP;
-        let pSkills = [], eSkills = [];
-        let pCurrentCooldowns = [], eCurrentCooldowns = [];
-        let gameActive = true;
-        let currentDifficulty = 'normal';
+        let playerName, enemyName, pHP, eHP, pMaxHP, eMaxHP, pSkills, eSkills, pCurrentCooldowns = [], eCurrentCooldowns = [], gameActive = true;
 
-        window.onload = () => {
-            const roster = document.getElementById('roster');
-            heroes.forEach(name => {
-                let btn = document.createElement('button');
-                btn.className = 'character-card';
-                btn.innerText = name;
-                btn.onclick = () => start(name);
-                roster.appendChild(btn);
-            });
-        };
-
-        function start(playerName) {
+        function start(name) {
+            playerName = name;
+            let available = Object.keys(charData).filter(h => h !== playerName);
+            enemyName = available[Math.floor(Math.random() * available.length)];
+            
+            pHP = pMaxHP = charData[playerName].hp;
+            eHP = eMaxHP = charData[enemyName].hp;
+            pSkills = charData[playerName].skills;
+            eSkills = charData[enemyName].skills;
+            pCurrentCooldowns = new Array(pSkills.length).fill(0);
+            eCurrentCooldowns = new Array(eSkills.length).fill(0);
             gameActive = true;
-            currentDifficulty = localStorage.getItem('diff') || 'normal';
-            let limit = currentDifficulty === 'facile' ? 2 : currentDifficulty === 'normal' ? 4 : currentDifficulty === 'difficile' ? 6 : 7;
 
             document.getElementById('selection-screen').style.display = 'none';
             document.getElementById('battle-screen').style.display = 'block';
-            document.getElementById('actions').style.display = 'grid'; // Affiche la grille de sorts
-            document.getElementById('end-title').style.display = 'none'; // Cache le titre de fin
-            document.getElementById('end-actions').style.display = 'none'; // Cache les boutons de fin
-            document.getElementById('log').innerHTML = "Que le combat commence !";
-
-            let availableEnemies = heroes.filter(h => h !== playerName);
-            let enemyName = availableEnemies[Math.floor(Math.random() * availableEnemies.length)];
-
-            pMaxHP = pHP = charData[playerName].hp;
-            eMaxHP = eHP = charData[enemyName].hp;
-
             document.getElementById('p-name').innerText = playerName;
             document.getElementById('e-name').innerText = enemyName;
-
-            pSkills = charData[playerName].skills.slice(0, limit);
-            eSkills = charData[enemyName].skills.slice(0, limit);
+            document.getElementById('end-title').style.display = 'none';
+            document.getElementById('end-actions').style.display = 'none';
+            document.getElementById('actions').style.display = 'grid';
             
-            pCurrentCooldowns = new Array(pSkills.length).fill(0);
-            eCurrentCooldowns = new Array(eSkills.length).fill(0);
-
-            updateHealthBars();
             updateUI();
+            updateHealthBars();
+        }
+
+        function updateUI() {
+            const actions = document.getElementById('actions');
+            actions.innerHTML = '';
+            pSkills.forEach((s, i) => {
+                let btn = document.createElement('button');
+                btn.className = 'skill';
+                let effect = s.dmg > 0 && s.heal > 0 ? `${s.dmg} Dmg / ${s.heal} Soin` : s.dmg > 0 ? `${s.dmg} Dmg` : `${s.heal} Soin`;
+                btn.innerHTML = `<b>${s.name}</b><br>${effect}<br>${pCurrentCooldowns[i] > 0 ? 'CD: ' + pCurrentCooldowns[i] : 'Prêt'}`;
+                btn.disabled = pCurrentCooldowns[i] > 0 || !gameActive;
+                btn.onclick = () => play(i);
+                actions.appendChild(btn);
+            });
+        }
+
+        function play(i) {
+            let s = pSkills[i];
+            let log = `${playerName} utilise <b>${s.name}</b> ! `;
+            if(s.dmg > 0) { eHP -= s.dmg; log += `Il inflige ${s.dmg} Dmg. `; }
+            if(s.heal > 0) { pHP = Math.min(pMaxHP, pHP + s.heal); log += `Il récupère ${s.heal} PV. `; }
+            
+            pCurrentCooldowns[i] = s.cd;
+            pCurrentCooldowns = pCurrentCooldowns.map(x => Math.max(0, x - 1));
+            
+            document.getElementById('log').innerHTML = log;
+            updateHealthBars();
+            if(eHP <= 0) endGame(true);
+            else setTimeout(enemyTurn, 1200);
+        }
+
+        function enemyTurn() {
+            let i = eSkills.findIndex((s, idx) => eCurrentCooldowns[idx] === 0);
+            let s = eSkills[i];
+            let log = `${enemyName} utilise <b>${s.name}</b> ! `;
+            if(s.dmg > 0) { pHP -= s.dmg; log += `Il inflige ${s.dmg} Dmg. `; }
+            if(s.heal > 0) { eHP = Math.min(eMaxHP, eHP + s.heal); log += `Il récupère ${s.heal} PV. `; }
+            
+            eCurrentCooldowns[i] = s.cd;
+            eCurrentCooldowns = eCurrentCooldowns.map(x => Math.max(0, x - 1));
+            
+            document.getElementById('log').innerHTML = log;
+            updateHealthBars();
+            if(pHP <= 0) endGame(false);
+            else updateUI();
         }
 
         function updateHealthBars() {
             document.getElementById('p-hp').innerText = `${pHP}/${pMaxHP}`;
             document.getElementById('e-hp').innerText = `${eHP}/${eMaxHP}`;
-
-            document.getElementById('p-bar').style.width = Math.max(0, (pHP / pMaxHP) * 100) + '%';
-            document.getElementById('e-bar').style.width = Math.max(0, (eHP / eMaxHP) * 100) + '%';
+            document.getElementById('p-bar').style.width = (pHP/pMaxHP)*100 + '%';
+            document.getElementById('e-bar').style.width = (eHP/eMaxHP)*100 + '%';
         }
 
-        function updateUI() {
-            if (!gameActive) return;
-            const actions = document.getElementById('actions');
-            actions.innerHTML = ''; 
-
-            pSkills.forEach((s, index) => {
-                let btn = document.createElement('button');
-                btn.className = 'skill';
-                
-                let effectText = s.dmg > 0 ? `${s.dmg} Dmg` : `+${s.heal} PV`;
-                
-                if (pCurrentCooldowns[index] > 0) {
-                    btn.innerHTML = `<b>${s.name}</b><br>${effectText}<br><span style="color:red;">(${pCurrentCooldowns[index]} T)</span>`;
-                    btn.disabled = true;
-                } else {
-                    btn.innerHTML = `<b>${s.name}</b><br>${effectText}<br>(${s.cd} CD)`;
-                    btn.onclick = () => play(index);
-                }
-                
-                actions.appendChild(btn);
-            });
-        }
-
-        function disableAllButtons() {
-            const buttons = document.querySelectorAll('.skill');
-            buttons.forEach(btn => btn.disabled = true);
-        }
-
-        function endGame(victory) {
+        function endGame(v) {
             gameActive = false;
-            
-            // On cache la grille d'attaques pour faire de la place aux gros boutons de fin
             document.getElementById('actions').style.display = 'none';
-            
-            const endTitle = document.getElementById('end-title');
-            endTitle.style.display = 'block';
-
-            if (victory) {
-                endTitle.className = "victory-text";
-                endTitle.innerHTML = "🎉 VICTOIRE !";
-                document.getElementById('log').innerHTML = "L'ennemi a été terrassé avec succès.";
-            } else {
-                endTitle.className = "defeat-text";
-                endTitle.innerHTML = "💀 DÉFAITE...";
-                document.getElementById('log').innerHTML = "Tu es tombé au combat.";
-            }
-
-            // Rend visible les boutons Rejouer / Accueil
+            document.getElementById('end-title').style.display = 'block';
+            document.getElementById('end-title').innerText = v ? "VICTOIRE !" : "DÉFAITE...";
             document.getElementById('end-actions').style.display = 'flex';
         }
 
-        function backToMenu() {
-            document.getElementById('battle-screen').style.display = 'none';
-            document.getElementById('selection-screen').style.display = 'block';
-        }
-
-        function goToMainMenu() {
-            window.location.href = 'index.html'; 
-        }
-
-        function play(skillIndex) {
-            if (!gameActive) return;
-            disableAllButtons();
-
-            let skill = pSkills[skillIndex];
-            let logMsg = `Tu utilises ${skill.name} !<br>`;
-            
-            if (skill.dmg > 0) {
-                eHP -= skill.dmg;
-                logMsg += `Tu infliges <span style="color:#ff4646;">${skill.dmg} dégâts</span>.`;
-            }
-            if (skill.heal > 0) {
-                pHP = Math.min(pMaxHP, pHP + skill.heal);
-                logMsg += `Tu te soignes de <span style="color:#4caf50;">${skill.heal} PV</span>.`;
-            }
-
-            document.getElementById('log').innerHTML = logMsg;
-            
-            for (let i = 0; i < pCurrentCooldowns.length; i++) {
-                if (pCurrentCooldowns[i] > 0) pCurrentCooldowns[i]--;
-            }
-            if (skill.cd > 0) pCurrentCooldowns[skillIndex] = skill.cd;
-
-            updateHealthBars();
-
-            if (eHP <= 0) {
-                endGame(true);
-                return;
-            }
-
-            setTimeout(enemyTurn, 1500);
-        }
-
-        function enemyTurn() {
-            if (!gameActive) return;
-
-            for (let i = 0; i < eCurrentCooldowns.length; i++) {
-                if (eCurrentCooldowns[i] > 0) eCurrentCooldowns[i]--;
-            }
-
-            let availableIndices = [];
-            for (let i = 0; i < eSkills.length; i++) {
-                if (eCurrentCooldowns[i] === 0) availableIndices.push(i);
-            }
-
-            let healSkills = availableIndices.filter(i => eSkills[i].heal > 0).sort((a, b) => eSkills[b].heal - eSkills[a].heal);
-            let dmgSkills = availableIndices.filter(i => eSkills[i].dmg > 0).sort((a, b) => eSkills[b].dmg - eSkills[a].dmg);
-
-            let chosenIndex = -1;
-
-            if (currentDifficulty === 'facile') {
-                let logicalChoices = [...availableIndices];
-                if (eHP >= eMaxHP * 0.8) {
-                    logicalChoices = logicalChoices.filter(i => eSkills[i].heal === 0);
-                }
-                if (eHP < eMaxHP * 0.35 && healSkills.length > 0) {
-                    chosenIndex = healSkills[0];
-                } else {
-                    chosenIndex = logicalChoices.length > 0 ? logicalChoices[Math.floor(Math.random() * logicalChoices.length)] : availableIndices[0];
-                }
-            } 
-            else if (currentDifficulty === 'normal') {
-                if (eHP < eMaxHP * 0.5 && healSkills.length > 0 && Math.random() < 0.7) {
-                    chosenIndex = healSkills[0];
-                } else {
-                    chosenIndex = dmgSkills.length > 0 ? dmgSkills[Math.floor(Math.random() * dmgSkills.length)] : availableIndices[0];
-                }
-            } 
-            else if (currentDifficulty === 'difficile') {
-                if (eHP <= eMaxHP * 0.4 && healSkills.length > 0) {
-                    chosenIndex = healSkills[0];
-                } else {
-                    chosenIndex = dmgSkills.length > 0 ? dmgSkills[0] : availableIndices[0];
-                }
-            } 
-            else {
-                let lethalSkill = dmgSkills.find(i => eSkills[i].dmg >= pHP);
-                if (lethalSkill !== undefined) {
-                    chosenIndex = lethalSkill;
-                } else if (eHP <= eMaxHP * 0.45 && healSkills.length > 0) {
-                    chosenIndex = healSkills[0];
-                } else {
-                    chosenIndex = dmgSkills.length > 0 ? dmgSkills[0] : availableIndices[0];
-                }
-            }
-
-            if (chosenIndex === -1) chosenIndex = availableIndices[0];
-
-            let eSkill = eSkills[chosenIndex];
-            let logMsg = `L'ennemi utilise ${eSkill.name} !<br>`;
-
-            if (eSkill.dmg > 0) {
-                pHP -= eSkill.dmg;
-                logMsg += `Il t'inflige <span style="color:#ff4646;">${eSkill.dmg} dégâts</span>.`;
-            }
-            if (eSkill.heal > 0) {
-                eHP = Math.min(eMaxHP, eHP + eSkill.heal);
-                logMsg += `Il se soigne de <span style="color:#4caf50;">${eSkill.heal} PV</span>.`;
-            }
-
-            document.getElementById('log').innerHTML = logMsg;
-
-            if (eSkill.cd > 0) eCurrentCooldowns[chosenIndex] = eSkill.cd;
-
-            updateHealthBars();
-
-            if (pHP <= 0) {
-                endGame(false);
-            } else {
-                updateUI();
-            }
-        }
+        function backToMenu() { location.reload(); }
+        function goToMainMenu() { window.location.href = 'index.html'; }
+        
+        // Initialisation
+        const roster = document.getElementById('roster');
+        Object.keys(charData).forEach(name => {
+            let btn = document.createElement('button');
+            btn.className = 'character-card';
+            btn.innerText = name;
+            btn.onclick = () => start(name);
+            roster.appendChild(btn);
+        });
     </script>
 </body>
 </html>
