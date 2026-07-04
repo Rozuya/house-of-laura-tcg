@@ -40,7 +40,6 @@
         let diff = parseInt(localStorage.getItem('diff')) || 4;
         const eName = Object.keys(chars).filter(n => n !== pName)[0];
 
-        // Initialisation avec état de cooldown
         let pS = chars[pName].skills.slice(0, diff).map(s => ({...s, cdActuel: 0}));
         let eS = chars[eName].skills.slice(0, diff).map(s => ({...s, cdActuel: 0}));
 
@@ -48,6 +47,8 @@
         let isPlayerTurn = true;
 
         function updateUI() {
+            document.getElementById('p-name').innerText = pName;
+            document.getElementById('e-name').innerText = eName;
             document.getElementById('p-hp').innerText = `${Math.max(0, pHP)}/${chars[pName].hp}`;
             document.getElementById('e-hp').innerText = `${Math.max(0, eHP)}/${chars[eName].hp}`;
             document.getElementById('p-bar').style.width = (Math.max(0, pHP) / chars[pName].hp * 100) + "%";
@@ -63,12 +64,14 @@
                 b.className = 'btn';
                 b.style.display = "flex"; b.style.flexDirection = "column"; b.style.alignItems = "center";
                 
+                // Si en recharge, on affiche le temps restant
                 if(s.cdActuel > 0) {
                     b.style.opacity = "0.5";
-                    b.innerHTML = `<strong>${s.n}</strong><small>CD: ${s.cdActuel}</small>`;
+                    b.innerHTML = `<strong>${s.n}</strong><small>Recharge: ${s.cdActuel}</small>`;
                     b.disabled = true;
                 } else {
-                    b.innerHTML = `<strong>${s.n}</strong><small>${s.t === 'heal' ? '+' : ''}${s.v} ${s.t}</small>`;
+                    // Si dispo, on affiche le CD total pour info
+                    b.innerHTML = `<strong>${s.n}</strong><small>CD: ${s.cd} | ${s.t === 'heal' ? '+' : ''}${s.v} ${s.t}</small>`;
                     b.onclick = () => play(i);
                 }
                 container.appendChild(b);
@@ -78,41 +81,33 @@
         function play(i) {
             if(!isPlayerTurn || pS[i].cdActuel > 0) return;
             
-            // Action
             if(pS[i].t === 'dmg') eHP -= pS[i].v;
             else pHP = Math.min(chars[pName].hp, pHP + pS[i].v);
             
-            // Lancer CD
-            pS[i].cdActuel = pS[i].cd;
+            pS[i].cdActuel = pS[i].cd + 1; // Le +1 sert à ce que le tour actuel compte
             
-            document.getElementById('log').innerText = `Utilisé : ${pS[i].n} !`;
+            document.getElementById('log').innerText = `Tu as utilisé ${pS[i].n} !`;
             updateUI();
             
             if(eHP <= 0) alert("Victoire !");
-            else { 
-                isPlayerTurn = false; 
-                setTimeout(aiTurn, 1000); 
-            }
+            else { isPlayerTurn = false; setTimeout(aiTurn, 1000); }
         }
 
         function aiTurn() {
-            // Decrementer CD Joueur avant tour IA
             pS.forEach(s => { if(s.cdActuel > 0) s.cdActuel--; });
             
-            // IA joue
             let dispo = eS.filter(s => s.cdActuel === 0);
-            let s = dispo[Math.floor(Math.random() * dispo.length)];
-            
-            if(s) {
+            if(dispo.length > 0) {
+                let s = dispo[Math.floor(Math.random() * dispo.length)];
                 if(s.t === 'dmg') pHP -= s.v;
                 else eHP = Math.min(chars[eName].hp, eHP + s.v);
-                s.cdActuel = s.cd;
-                document.getElementById('log').innerText = `${eName} a utilisé ${s.n} !`;
+                s.cdActuel = s.cd + 1;
+                document.getElementById('log').innerText = `${eName} utilise ${s.n} !`;
+            } else {
+                document.getElementById('log').innerText = `${eName} attend...`;
             }
 
-            // Decrementer CD IA
             eS.forEach(sk => { if(sk.cdActuel > 0) sk.cdActuel--; });
-            
             isPlayerTurn = true;
             updateUI();
         }
