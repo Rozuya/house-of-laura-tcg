@@ -1,12 +1,26 @@
-<link rel="stylesheet" href="style.css">
-<div class="container">
-    <h1>Difficulté</h1>
-    <button class="btn" onclick="save(2)">Facile</button>
-    <button class="btn" onclick="save(4)">Normal</button>
-    <button class="btn" onclick="save(6)">Difficile</button>
-    <button class="btn" onclick="save(7)">Expert</button>
-</div>
-<script>
-    function save(n) { localStorage.setItem('diff', n); location.href='personnage.html'; }
-</script>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choisis ta difficulté</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
+    <div class="container">
+        <h1>Choisis ta difficulté</h1>
+        <button class="btn" onclick="setDiff(2)">Facile (2 Compétences)</button>
+        <button class="btn" onclick="setDiff(4)">Normal (4 Compétences)</button>
+        <button class="btn" onclick="setDiff(6)">Difficile (6 Compétences)</button>
+        <button class="btn" onclick="setDiff(7)">Expert (7 Compétences)</button>
+    </div>
+
+    <script>
+        function setDiff(val) {
+            localStorage.setItem('diff', val);
+            location.href = 'personnage.html';
+        }
+    </script>
+</body>
+</html>
