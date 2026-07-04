@@ -8,11 +8,13 @@
 </head>
 <body>
 
+    <!-- Écran de sélection -->
     <div class="container" id="selection-screen">
         <h1>Choisis ton héros</h1>
         <div class="roster" id="roster"></div>
     </div>
 
+    <!-- Écran de combat -->
     <div class="container" id="battle-screen" style="display: none;">
         <div class="arena">
             <div>
@@ -119,7 +121,8 @@
             let hero = charData[n];
             let d = document.createElement('button');
             d.className = 'character-card';
-            d.innerHTML = `<span style="color: #9146ff; font-weight: bold;">${n}</span><br><span style="font-size: 0.7rem; color: #9146ff; opacity: 0.8;">${hero.role}</span>`;
+            // Correctif visuel : Nom en blanc (lisible), Rôle en violet
+            d.innerHTML = `<div style="color: white; font-weight: bold; font-size: 1.1rem;">${n}</div><div style="font-size: 0.8rem; color: #9146ff; margin-top: 5px;">${hero.role}</div>`;
             d.onclick = () => start(n);
             document.getElementById('roster').appendChild(d);
         });
