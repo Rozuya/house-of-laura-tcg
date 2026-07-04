@@ -1,11 +1,12 @@
+<link rel="stylesheet" href="style.css">
 <div class="container">
-    <h1>Choisir difficulté</h1>
-    <button class="btn" onclick="save(2)">Facile (2 compétences)</button>
-    <button class="btn" onclick="save(4)">Normal (4 compétences)</button>
-    <button class="btn" onclick="save(6)">Difficile (6 compétences)</button>
-    <button class="btn" style="border-color:#ff4646" onclick="save(7)">Expert (7 compétences)</button>
+    <h1>Difficulté</h1>
+    <button class="btn" onclick="save(2)">Facile</button>
+    <button class="btn" onclick="save(4)">Normal</button>
+    <button class="btn" onclick="save(6)">Difficile</button>
+    <button class="btn" onclick="save(7)">Expert</button>
 </div>
 <script>
-    function save(n) { localStorage.setItem('diff', n); location.href='jeu.html'; }
+    function save(n) { localStorage.setItem('diff', n); location.href='personnage.html'; }
 </script>
 
