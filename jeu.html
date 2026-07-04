@@ -5,35 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HOL Battle Arena</title>
     <style>
-        body { background-color: #121212; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; font-family: sans-serif; }
-        .container { width: 100%; max-width: 500px; text-align: center; padding: 20px; }
+        body { background-color: #121212; color: white; display: flex; justify-content: center; min-height: 100vh; margin: 0; font-family: sans-serif; padding: 20px; box-sizing: border-box; }
+        .container { width: 100%; max-width: 500px; text-align: center; }
         
-        /* Grille des compétences (2 colonnes pour bien voir le texte) */
-        .skills-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
+        h1 { margin-bottom: 30px; font-size: 2rem; }
+        .character-card { display: block; width: 100%; margin-bottom: 15px; padding: 20px; background: #1a1a1a; border: 1px solid #9146ff; color: white; border-radius: 8px; cursor: pointer; font-size: 1.1rem; transition: 0.2s; }
+        .character-card:hover { background: #9146ff; }
+
+        .health-bar-bg { background: #333; height: 20px; border-radius: 10px; margin: 10px 0; overflow: hidden; }
+        .health-fill { height: 100%; background: #9146ff; width: 100%; transition: width 0.3s; border-radius: 10px; }
+        .hp-text { font-size: 0.9rem; margin-top: 5px; color: #ccc; }
         
-        .skill-btn { padding: 15px; background: #1a1a1a; border: 1px solid #9146ff; color: white; border-radius: 8px; cursor: pointer; font-size: 0.9rem; }
-        .skill-btn:hover { background: #9146ff; }
+        .action-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 20px; }
+        .skill { padding: 15px 10px; background: #1a1a1a; border: 1px solid #9146ff; color: white; border-radius: 8px; cursor: pointer; font-size: 0.9rem; line-height: 1.4; transition: 0.2s; }
+        .skill:hover:not(:disabled) { background: #9146ff; }
         
-        /* Style des barres de vie comme sur tes photos */
-        .health-bar { width: 100%; height: 15px; background: #333; border-radius: 5px; margin: 10px 0; }
-        .health-fill { height: 100%; background: #9146ff; width: 100%; transition: width 0.3s; }
+        /* Style pour les compétences en cooldown */
+        .skill:disabled { background: #222; border-color: #555; color: #777; cursor: not-allowed; }
     </style>
 </head>
 <body>
 
-    <div class="container" id="battle-screen">
-        <div style="display: flex; justify-content: space-around; margin-bottom: 20px;">
-            <div style="width: 45%;"><h3 id="p-name"></h3><div class="health-bar"><div id="p-bar" class="health-fill"></div></div></div>
-            <div style="width: 45%;"><h3 id="e-name"></h3><div class="health-bar"><div id="e-bar" class="health-fill"></div></div></div>
+    <div class="container" id="selection-screen">
+        <h1>Choisis ton héros</h1>
+        <div id="roster"></div>
+    </div>
+
+    <div class="container" id="battle-screen" style="display: none;">
+        <div style="display: flex; gap: 20px; margin-bottom: 20px;">
+            <div style="flex:1">
+                <h3 id="p-name"></h3>
+                <div class="health-bar-bg"><div id="p-bar" class="health-fill"></div></div>
+                <div class="hp-text" id="p-hp"></div>
+            </div>
+            <div style="flex:1">
+                <h3 id="e-name"></h3>
+                <div class="health-bar-bg"><div id="e-bar" class="health-fill"></div></div>
+                <div class="hp-text" id="e-hp"></div>
+            </div>
         </div>
         
-        <div id="status-msg" style="margin: 20px 0; font-weight: bold; color: #9146ff;"></div>
+        <div id="log" style="margin: 20px 0; font-weight: bold; color: #9146ff; font-size: 1.1rem;">Que le combat commence !</div>
         
-        <div class="skills-grid" id="skills-grid"></div>
+        <div class="action-grid" id="actions"></div>
     </div>
 
     <script>
-        // Ta base de données
         const charData = {
             "House of Laura": { hp: 150, skills: [
                 { name: 'Hype du Chat', dmg: 18, heal: 0, cd: 0 },
@@ -44,32 +61,146 @@
                 { name: 'Clip Viral', dmg: 0, heal: 60, cd: 4 },
                 { name: 'Ban Hammer', dmg: 50, heal: 0, cd: 5 }
             ]},
-            /* Ajoute les autres persos ici avec la même structure */
+            "HOL Rozuya": { hp: 130, skills: [
+                { name: 'Ligne de Code', dmg: 12, heal: 0, cd: 0 },
+                { name: 'Corriger Bug', dmg: 0, heal: 25, cd: 1 },
+                { name: 'Compilation', dmg: 20, heal: 0, cd: 2 },
+                { name: 'Backup Serveur', dmg: 0, heal: 50, cd: 3 },
+                { name: 'Refactoring', dmg: 30, heal: 0, cd: 3 },
+                { name: 'Patch Sécurité', dmg: 0, heal: 70, cd: 4 },
+                { name: 'Kernel Panic', dmg: 45, heal: 0, cd: 5 }
+            ]},
+            "HOL Tony": { hp: 190, skills: [
+                { name: 'Coup de Poing', dmg: 18, heal: 0, cd: 0 },
+                { name: 'Boisson Énergie', dmg: 0, heal: 15, cd: 1 },
+                { name: 'Tacle Glissé', dmg: 30, heal: 0, cd: 2 },
+                { name: 'Second Souffle', dmg: 0, heal: 35, cd: 3 },
+                { name: 'Mur de Bouclier', dmg: 0, heal: 20, cd: 2 },
+                { name: 'Charge de Force', dmg: 40, heal: 0, cd: 4 },
+                { name: 'Colosse Déchaîné', dmg: 60, heal: 0, cd: 6 }
+            ]},
+            "HOL Omass": { hp: 160, skills: [
+                { name: 'Tir Précis', dmg: 20, heal: 0, cd: 0 },
+                { name: 'Pansement Rapide', dmg: 0, heal: 10, cd: 1 },
+                { name: 'Balle Perçante', dmg: 35, heal: 0, cd: 2 },
+                { name: 'Trousse de Soin', dmg: 0, heal: 30, cd: 3 },
+                { name: 'Grenade Flash', dmg: 25, heal: 0, cd: 3 },
+                { name: 'Concentration', dmg: 45, heal: 0, cd: 4 },
+                { name: 'Frappe Aérienne', dmg: 70, heal: 0, cd: 6 }
+            ]},
+            "K974YT": { hp: 140, skills: [
+                { name: 'Clic Droit', dmg: 22, heal: 0, cd: 0 },
+                { name: 'Soin Manette', dmg: 0, heal: 12, cd: 1 },
+                { name: 'Coup Critique', dmg: 38, heal: 0, cd: 2 },
+                { name: 'Heal de Zone', dmg: 0, heal: 25, cd: 3 },
+                { name: 'Dash Offensif', dmg: 30, heal: 0, cd: 2 },
+                { name: 'Combo Rapide', dmg: 40, heal: 0, cd: 4 },
+                { name: 'Explosion Finale', dmg: 65, heal: 0, cd: 6 }
+            ]},
+            "Dark MortelCygne": { hp: 120, skills: [
+                { name: 'Plume Noire', dmg: 18, heal: 0, cd: 0 },
+                { name: 'Saignée', dmg: 25, heal: 10, cd: 1 },
+                { name: 'Griffes du Néant', dmg: 35, heal: 0, cd: 2 },
+                { name: 'Festin Sanguin', dmg: 15, heal: 40, cd: 3 },
+                { name: 'Forme d\'Ombre', dmg: 10, heal: 20, cd: 2 },
+                { name: 'Pluie de Plumes', dmg: 45, heal: 0, cd: 4 },
+                { name: 'Étreinte Mortelle', dmg: 80, heal: -20, cd: 7 }
+            ]}
         };
 
-        function initCombat() {
-            const pName = "House of Laura"; // Récupéré de ton index
-            const diff = localStorage.getItem('diff') || 'normal';
+        const heroes = Object.keys(charData);
+        
+        // Variables globales pour le combat
+        let pSkills = [];
+        let pCurrentCooldowns = []; // Tableau qui va tracker les cooldowns actuels
+
+        window.onload = () => {
+            const roster = document.getElementById('roster');
+            heroes.forEach(name => {
+                let btn = document.createElement('button');
+                btn.className = 'character-card';
+                btn.innerText = name;
+                btn.onclick = () => start(name);
+                roster.appendChild(btn);
+            });
+        };
+
+        function start(playerName) {
+            let diff = localStorage.getItem('diff') || 'normal';
+            let limit = diff === 'facile' ? 2 : diff === 'normal' ? 4 : diff === 'difficile' ? 6 : 7;
+
+            document.getElementById('selection-screen').style.display = 'none';
+            document.getElementById('battle-screen').style.display = 'block';
+
+            let availableEnemies = heroes.filter(h => h !== playerName);
+            let enemyName = availableEnemies[Math.floor(Math.random() * availableEnemies.length)];
+
+            let pMaxHP = charData[playerName].hp;
+            let eMaxHP = charData[enemyName].hp;
+
+            document.getElementById('p-name').innerText = playerName;
+            document.getElementById('e-name').innerText = enemyName;
+            document.getElementById('p-hp').innerText = `${pMaxHP}/${pMaxHP}`;
+            document.getElementById('e-hp').innerText = `${eMaxHP}/${eMaxHP}`;
+
+            // Récupère les compétences filtrées
+            pSkills = charData[playerName].skills.slice(0, limit);
             
-            // Logique de limite de compétences
-            let limit = (diff === 'facile') ? 2 : (diff === 'normal') ? 4 : (diff === 'difficile') ? 6 : 7;
-            const availableSkills = charData[pName].skills.slice(0, limit);
+            // Initialiser les cooldowns à 0 pour chaque compétence
+            pCurrentCooldowns = new Array(pSkills.length).fill(0);
 
-            // Affichage
-            document.getElementById('p-name').innerText = pName;
-            document.getElementById('status-msg').innerText = "Que le combat commence !";
+            updateUI(); // Affiche les boutons
+        }
 
-            const grid = document.getElementById('skills-grid');
-            availableSkills.forEach(s => {
-                const btn = document.createElement('button');
-                btn.className = 'skill-btn';
-                // Affichage exactement comme sur ta capture (Nom + Dmg/Soin + CD)
-                btn.innerHTML = `<b>${s.name}</b><br>${s.dmg > 0 ? s.dmg + ' Dmg' : '+' + s.heal + ' PV'} (${s.cd} CD)`;
-                grid.appendChild(btn);
+        // Fonction séparée pour afficher/mettre à jour les boutons selon leurs cooldowns
+        function updateUI() {
+            const actions = document.getElementById('actions');
+            actions.innerHTML = ''; 
+
+            pSkills.forEach((s, index) => {
+                let btn = document.createElement('button');
+                btn.className = 'skill';
+                
+                let effectText = s.dmg > 0 ? `${s.dmg} Dmg` : `+${s.heal} PV`;
+                
+                // Si le cooldown actuel est plus grand que 0, on change le texte
+                if (pCurrentCooldowns[index] > 0) {
+                    btn.innerHTML = `<b>${s.name}</b><br>${effectText}<br><span style="color:red;">En recharge (${pCurrentCooldowns[index]} T)</span>`;
+                    btn.disabled = true; // Empêche de cliquer
+                } else {
+                    btn.innerHTML = `<b>${s.name}</b><br>${effectText}<br>(${s.cd} CD)`;
+                    btn.onclick = () => play(index); // Autorise le clic
+                }
+                
+                actions.appendChild(btn);
             });
         }
 
-        initCombat();
+        function play(skillIndex) {
+            let skill = pSkills[skillIndex];
+            
+            document.getElementById('log').innerText = `Tu as utilisé ${skill.name} !`;
+            
+            // --- TA LOGIQUE DE COMBAT ICI (enlever les PV, se soigner, etc.) ---
+
+            // GESTION DES COOLDOWNS :
+            // 1. Réduire de 1 le cooldown de tous les sorts qui sont en recharge
+            for (let i = 0; i < pCurrentCooldowns.length; i++) {
+                if (pCurrentCooldowns[i] > 0) {
+                    pCurrentCooldowns[i]--;
+                }
+            }
+
+            // 2. Appliquer le cooldown max au sort qu'on vient juste d'utiliser
+            if (skill.cd > 0) {
+                pCurrentCooldowns[skillIndex] = skill.cd;
+            }
+
+            // 3. Mettre à jour l'affichage des boutons
+            updateUI();
+            
+            // --- TOUR DE L'ENNEMI ICI ---
+        }
     </script>
 </body>
 </html>
