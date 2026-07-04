@@ -1,18 +1,97 @@
-/* Style Global */
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-body { background: #121212; color: white; display: flex; justify-content: center; min-height: 100vh; padding: 20px; }
-.container { width: 100%; max-width: 500px; text-align: center; }
+/* --- Reset global --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 
-/* Boutons */
-.btn { display: block; width: 100%; padding: 15px; margin: 10px 0; background: #9146ff; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-.btn:hover { background: #7733cc; }
+body {
+    background-color: #121212 !important;
+    color: #ffffff !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    min-height: 100vh !important;
+    padding: 20px !important;
+}
 
-/* Modals (Pop-ups) */
-.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 1000; }
-.modal-content { background: #1a1a1a; padding: 25px; border-radius: 15px; width: 90%; max-width: 400px; border: 2px solid #9146ff; }
+.container {
+    width: 100% !important;
+    max-width: 500px !important;
+    text-align: center !important;
+}
 
-/* Combat */
-.roster { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.health-bar { height: 20px; background: #333; border-radius: 10px; overflow: hidden; margin: 10px 0; }
-.bar { height: 100%; background: #9146ff; transition: 0.3s; }
-.skill-info { font-size: 0.75rem; color: #aaa; margin-top: 4px; }
+h1, h2 {
+    color: #9146ff !important;
+    margin-bottom: 20px !important;
+}
+
+/* --- Boutons --- */
+.btn {
+    display: block !important;
+    width: 100% !important;
+    padding: 18px !important;
+    margin: 10px 0 !important;
+    background: #252525 !important;
+    color: white !important;
+    border: 2px solid #9146ff !important;
+    border-radius: 8px !important;
+    font-size: 1.1rem !important;
+    cursor: pointer !important;
+    transition: 0.3s !important;
+}
+
+.btn:hover {
+    background: #9146ff !important;
+}
+
+/* --- Grille des personnages --- */
+.roster {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 15px !important;
+    margin-top: 20px !important;
+}
+
+/* --- Barres de vie --- */
+.health-bar {
+    width: 100% !important;
+    height: 25px !important;
+    background: #333 !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    margin: 15px 0 !important;
+    border: 1px solid #444 !important;
+}
+
+.bar {
+    height: 100% !important;
+    background: #9146ff !important;
+    width: 100% !important;
+    transition: width 0.5s ease !important;
+}
+
+/* --- Pop-up (Modal) --- */
+.modal {
+    display: none !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: rgba(0,0,0,0.9) !important;
+    justify-content: center !important;
+    align-items: center !important;
+    z-index: 1000 !important;
+}
+
+.modal-content {
+    background: #1a1a1a !important;
+    padding: 30px !important;
+    border-radius: 15px !important;
+    border: 2px solid #9146ff !important;
+    width: 90% !important;
+    max-width: 400px !important;
+    text-align: center !important;
+}
