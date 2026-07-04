@@ -6,39 +6,43 @@
     <title>HOL Battle Arena</title>
     <style>
         body { background: #121212; color: white; display: flex; justify-content: center; min-height: 100vh; margin: 0; font-family: sans-serif; padding: 10px; }
-        .container { width: 100%; max-width: 600px; text-align: center; }
-        /* Rendre les boutons adaptatifs pour mobile et PC */
-        .btn-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-top: 10px; }
-        .character-card, .difficulty-btn { padding: 15px; background: #1a1a1a; border: 1px solid #9146ff; color: white; border-radius: 8px; cursor: pointer; font-size: 16px; }
-        .difficulty-btn { background: #9146ff; }
-        .skill { padding: 20px; background: #222; border: 1px solid #9146ff; color: white; margin: 5px; cursor: pointer; }
+        .container { width: 100%; max-width: 500px; text-align: center; }
+        .btn { display: block; width: 100%; padding: 20px; margin: 10px 0; background: #1a1a1a; border: 1px solid #9146ff; color: white; border-radius: 8px; cursor: pointer; font-size: 18px; }
+        .btn:hover { background: #333; }
+        .skill { padding: 15px; background: #222; border: 1px solid #9146ff; color: white; margin: 5px; width: 45%; cursor: pointer; }
         .skill:disabled { opacity: 0.3; cursor: not-allowed; }
         #log { margin: 20px 0; padding: 15px; background: #000; border: 1px solid #9146ff; font-weight: bold; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; z-index: 100; }
-        .modal-content { background: #1a1a1a; padding: 30px; border: 2px solid #9146ff; border-radius: 10px; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
 
-    <div class="container" id="menu">
+    <!-- Écran 1 : Difficulté -->
+    <div class="container" id="screen-diff">
+        <h1>Choix de la difficulté</h1>
+        <button class="btn" onclick="selectDiff(2)">Facile (2)</button>
+        <button class="btn" onclick="selectDiff(4)">Normal (4)</button>
+        <button class="btn" onclick="selectDiff(6)">Difficile (6)</button>
+        <button class="btn" onclick="selectDiff(7)">Expert (7)</button>
+    </div>
+
+    <!-- Écran 2 : Héros -->
+    <div class="container" id="screen-hero" style="display: none;">
         <h1>Choisis ton héros</h1>
-        <div id="roster" class="btn-grid"></div>
-        <h2>Choisis la difficulté</h2>
-        <div id="diffs" class="btn-grid"></div>
+        <div id="roster"></div>
     </div>
 
-    <div class="container" id="battle" style="display: none;">
+    <!-- Écran 3 : Combat -->
+    <div class="container" id="screen-battle" style="display: none;">
         <h2 id="fight-info"></h2>
-        <div id="log">Le combat commence !</div>
-        <div id="actions" class="btn-grid"></div>
+        <div id="log">Combat !</div>
+        <div id="actions"></div>
     </div>
 
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <h2 id="modal-title">Fin du combat</h2>
-            <button class="difficulty-btn" onclick="location.reload()">Retour Accueil</button>
-        </div>
-    </div>
+    <div id="modal" class="modal"><div style="background:#1a1a1a; padding:30px; border:2px solid #9146ff;">
+        <h2 id="modal-title"></h2>
+        <button class="btn" onclick="location.reload()">Rejouer</button>
+    </div></div>
 
     <script>
         const charData = {
@@ -50,30 +54,57 @@
             "Dark MortelCygne": { hp: 220, skills: [{n:'Plume',d:40,h:0},{n:'Saignée',d:60,h:10},{n:'Griffes',d:60,h:0},{n:'Festin',d:30,h:30},{n:'Étreinte',d:90,h:20},{n:'Ombre',d:50,h:0},{n:'Noir',d:110,h:0}] }
         };
 
-        let selectedHero = null, diffs = { 'Facile': 2, 'Normal': 4, 'Difficile': 6, 'Expert': 7 };
-        
-        // Initialisation du menu
-        Object.keys(charData).forEach(name => {
-            let b = document.createElement('button');
-            b.className = 'character-card'; b.innerText = name;
-            b.onclick = () => { selectedHero = name; alert(name + " sélectionné !"); };
-            document.getElementById('roster').appendChild(b);
-        });
+        let count, pName, eName, pHP, eHP, pMax, eMax, pS, eS, isPlayerTurn = true;
 
-        Object.keys(diffs).forEach(d => {
-            let b = document.createElement('button');
-            b.className = 'difficulty-btn'; b.innerText = d + " (" + diffs[d] + ")";
-            b.onclick = () => { if(selectedHero) start(d, diffs[d]); else alert("Choisis un héros !"); };
-            document.getElementById('diffs').appendChild(b);
-        });
-
-        function start(mode, count) {
-            // ... (logique de jeu inchangée pour assurer la fluidité) ...
-            document.getElementById('menu').style.display = 'none';
-            document.getElementById('battle').style.display = 'block';
-            // suite du code...
+        function selectDiff(c) {
+            count = c;
+            document.getElementById('screen-diff').style.display = 'none';
+            document.getElementById('screen-hero').style.display = 'block';
+            Object.keys(charData).forEach(name => {
+                let b = document.createElement('button');
+                b.className = 'btn'; b.innerText = name;
+                b.onclick = () => start(name);
+                document.getElementById('roster').appendChild(b);
+            });
         }
+
+        function start(name) {
+            pName = name;
+            let ops = Object.keys(charData).filter(n => n !== pName);
+            eName = ops[Math.floor(Math.random() * ops.length)];
+            pMax = pHP = charData[pName].hp; eMax = eHP = charData[eName].hp;
+            pS = charData[pName].skills.slice(0, count); eS = charData[eName].skills.slice(0, count);
+            document.getElementById('screen-hero').style.display = 'none';
+            document.getElementById('screen-battle').style.display = 'block';
+            updateUI();
+        }
+
+        function play(i) {
+            if (!isPlayerTurn) return;
+            isPlayerTurn = false;
+            updateUI();
+            eHP -= pS[i].d; pHP = Math.min(pMax, pHP + pS[i].h);
+            document.getElementById('log').innerText = `${pName} utilise ${pS[i].n}.`;
+            if(eHP <= 0) setTimeout(() => end("Victoire !"), 800);
+            else setTimeout(() => {
+                let s = eS.sort((a,b)=>b.d-a.d)[0];
+                pHP -= s.d; eHP = Math.min(eMax, eHP+s.h);
+                document.getElementById('log').innerText = `${eName} utilise ${s.n}.`;
+                if(pHP <= 0) end("Défaite..."); else { isPlayerTurn = true; updateUI(); }
+            }, 1000);
+        }
+
+        function updateUI() {
+            document.getElementById('fight-info').innerText = `${pName} (${pHP}) vs ${eName} (${eHP})`;
+            let act = document.getElementById('actions'); act.innerHTML = '';
+            pS.forEach((s, i) => {
+                let b = document.createElement('button'); b.className = 'skill'; b.disabled = !isPlayerTurn;
+                b.innerHTML = `${s.n}<br>${s.d||s.h}`; b.onclick = () => play(i);
+                act.appendChild(b);
+            });
+        }
+
+        function end(msg) { document.getElementById('modal-title').innerText = msg; document.getElementById('modal').style.display = 'flex'; }
     </script>
 </body>
 </html>
-
