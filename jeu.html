@@ -10,29 +10,28 @@
         .action-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 20px; }
         .skill { padding: 15px; background: #1a1a1a; border: 1px solid #9146ff; color: white; border-radius: 8px; cursor: pointer; transition: 0.2s; }
         .skill:hover:not(:disabled) { background: #9146ff; }
-        .character-card { background: #1a1a1a; border: 1px solid #9146ff; padding: 20px; border-radius: 8px; cursor: pointer; color: white; transition: 0.2s; text-align: center; }
+        .character-card { display: block; width: 100%; margin-bottom: 10px; padding: 20px; background: #1a1a1a; border: 1px solid #9146ff; color: white; border-radius: 8px; cursor: pointer; transition: 0.2s; text-align: center; font-size: 1.1rem; }
         .character-card:hover { background: #9146ff; }
         .health-bar-bg { background: #333; height: 20px; border-radius: 5px; overflow: hidden; margin: 5px; }
-        .health-fill { height: 100%; transition: width 0.5s; }
+        .health-fill { height: 100%; transition: width 0.5s; background: #9146ff; }
     </style>
 </head>
 <body>
 
     <div class="container" id="selection-screen">
         <h1 style="text-align: center;">Choisis ton héros</h1>
-        <div class="roster" id="roster" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px;"></div>
+        <div class="roster" id="roster"></div>
     </div>
 
     <div class="container" id="battle-screen" style="display: none;">
-        <!-- Design calqué sur 1000036399_3.jpg -->
         <div class="arena" style="text-align: center; max-width: 500px; margin: auto;">
             <div style="display: flex; gap: 10px;">
                 <h3 style="flex: 1;" id="p-name"></h3>
                 <h3 style="flex: 1;" id="e-name"></h3>
             </div>
             <div style="display: flex; gap: 10px;">
-                <div class="health-bar-bg" style="flex: 1;"><div id="p-bar" class="health-fill" style="background: #9146ff; width: 100%;"></div></div>
-                <div class="health-bar-bg" style="flex: 1;"><div id="e-bar" class="health-fill" style="background: #9146ff; width: 100%;"></div></div>
+                <div class="health-bar-bg" style="flex: 1;"><div id="p-bar" class="health-fill" style="width: 100%;"></div></div>
+                <div class="health-bar-bg" style="flex: 1;"><div id="e-bar" class="health-fill" style="width: 100%;"></div></div>
             </div>
             <div style="display: flex; gap: 10px; margin-bottom: 20px; font-weight: bold;">
                 <p style="flex: 1;" id="p-hp">0/0</p>
@@ -58,21 +57,44 @@
     </div>
 
     <script>
-        const diff = 'normal';
         let pHP, eHP, pMaxHP, eMaxHP, active = true;
         let playerName, enemyName;
         let pSkills = {}, eSkills = {};
         
         const charData = {
-            "House of Laura": { hp: 150, role: "Équilibré", skills: {
+            "House of Laura": { hp: 150, skills: {
                 'basic': { name: 'Hype du Chat', dmg: 18, heal: 0, cd: 0 },
                 'heal': { name: 'Pause Café', dmg: 0, heal: 25, cd: 2 },
                 'brise': { name: 'Raid Massif', dmg: 30, heal: 0, cd: 2 },
                 'bigHeal': { name: 'Soutien des Subs', dmg: 0, heal: 60, cd: 3 }
             }},
-            "Dark MortelCygne": { hp: 120, role: "Vampire", skills: {
+            "HOL Rozuya": { hp: 130, skills: {
+                'basic': { name: 'Ligne de Code', dmg: 15, heal: 0, cd: 0 },
+                'heal': { name: 'Corriger Bug', dmg: 0, heal: 35, cd: 1 },
+                'brise': { name: 'Compilation', dmg: 20, heal: 0, cd: 2 },
+                'bigHeal': { name: 'Backup Serveur', dmg: 0, heal: 80, cd: 3 }
+            }},
+            "HOL Tony": { hp: 190, skills: {
+                'basic': { name: 'Coup de Poing', dmg: 20, heal: 0, cd: 0 },
+                'heal': { name: 'Boisson Énergie', dmg: 0, heal: 20, cd: 2 },
+                'brise': { name: 'Tacle Glissé', dmg: 35, heal: 0, cd: 2 },
+                'bigHeal': { name: 'Second Souffle', dmg: 0, heal: 50, cd: 3 }
+            }},
+            "HOL Omass": { hp: 160, skills: {
+                'basic': { name: 'Tir Précis', dmg: 22, heal: 0, cd: 0 },
+                'heal': { name: 'Pansement', dmg: 0, heal: 15, cd: 2 },
+                'brise': { name: 'Balle Perçante', dmg: 40, heal: 0, cd: 2 },
+                'bigHeal': { name: 'Trousse de Soin', dmg: 0, heal: 40, cd: 3 }
+            }},
+            "K974YT": { hp: 140, skills: {
+                'basic': { name: 'Clic Droit', dmg: 20, heal: 0, cd: 0 },
+                'heal': { name: 'Soin Manette', dmg: 0, heal: 20, cd: 2 },
+                'brise': { name: 'Coup Critique', dmg: 35, heal: 0, cd: 2 },
+                'bigHeal': { name: 'Heal de Zone', dmg: 0, heal: 50, cd: 3 }
+            }},
+            "Dark MortelCygne": { hp: 120, skills: {
                 'basic': { name: 'Plume Noire', dmg: 16, heal: 0, cd: 0 },
-                'heal': { name: 'Vol de Vie', dmg: 40, heal: 40, cd: 2 }, /* Vol de 40 PV */
+                'heal': { name: 'Vol de Vie', dmg: 40, heal: 40, cd: 2 }, 
                 'brise': { name: 'Frappe Obscure', dmg: 30, heal: 0, cd: 2 },
                 'bigHeal': { name: 'Aura Ténébreuse', dmg: 0, heal: 60, cd: 3 }
             }}
@@ -80,10 +102,9 @@
 
         const heroes = Object.keys(charData);
         heroes.forEach(n => {
-            let hero = charData[n];
             let d = document.createElement('button');
             d.className = 'character-card';
-            d.innerHTML = `<strong>${n}</strong>`;
+            d.innerHTML = n;
             d.onclick = () => start(n);
             document.getElementById('roster').appendChild(d);
         });
