@@ -1,41 +1,100 @@
-/* Style global pour les cartes */
-.character-card {
-    background: #2a2a2a; /* Fond de base gris foncé */
-    color: white;
-    padding: 15px;
-    border: 2px solid #333; /* Bordure discrète par défaut */
-    border-radius: 10px;
-    cursor: pointer;
-    text-align: center;
-    transition: all 0.2s ease; /* Transition douce */
-    margin: 5px;
-    width: 200px;
-}
-
-/* L'effet au survol : on change juste le gris et on ajoute une bordure violette */
-.character-card:hover {
-    background: #444; /* Gris plus clair au survol */
-    border: 2px solid #9146ff; /* La bordure devient violette */
-    transform: scale(1.05); /* Petit effet de zoom */
-}
-
-/* Assure-toi que le conteneur des cartes est bien flexible */
-.roster {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 15px;
-    padding: 20px;
-}
-
-/* Styles pour le reste de ton interface */
+/* --- Base --- */
 body {
     background-color: #121212;
     color: white;
-    font-family: Arial, sans-serif;
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
 }
 
 .container {
+    width: 100%;
+    max-width: 600px;
     text-align: center;
-    margin-top: 50px;
+}
+
+/* --- Menu de sélection (Le 2x3) --- */
+.roster {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Force 2 colonnes */
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.character-card {
+    background: #1e1e1e;
+    border: 2px solid #333;
+    padding: 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    color: white;
+    transition: 0.3s;
+}
+
+.character-card:hover {
+    border-color: #9146ff;
+    transform: scale(1.02);
+    background: #252525;
+}
+
+/* --- Arène de combat --- */
+.arena {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.arena > div {
+    flex: 1;
+}
+
+/* Barres de vie */
+.health-bar-bg {
+    width: 100%;
+    height: 25px;
+    background: #333;
+    border-radius: 12px;
+    margin: 10px 0;
+    overflow: hidden;
+    border: 1px solid #444;
+}
+
+.health-fill {
+    height: 100%;
+    background: #9146ff;
+    width: 100%; /* La largeur est gérée par le JS */
+    transition: width 0.4s ease-out;
+}
+
+/* --- Grille d'actions --- */
+.action-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 boutons par ligne */
+    gap: 10px;
+}
+
+.skill {
+    padding: 15px;
+    background: #1e1e1e;
+    border: 2px solid #9146ff;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.skill:hover {
+    background: #9146ff;
+}
+
+.skill:disabled {
+    background: #333;
+    border-color: #555;
+    color: #888;
+    cursor: not-allowed;
 }
