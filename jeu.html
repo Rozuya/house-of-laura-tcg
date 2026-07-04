@@ -22,94 +22,99 @@
             </div>
         </div>
 
-        <h2 id="log" style="font-size: 1.1rem; margin: 25px 0; text-align: center; color: #9146ff;">Que le combat commence !</h2>
+        <h2 id="log" style="font-size: 1.1rem; margin: 25px 0; text-align: center; color: #9146ff;">À toi de jouer !</h2>
         <div id="actions" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;"></div>
-    </div>
-
-    <div id="endModal" class="modal">
-        <div class="modal-content" style="text-align: center;">
-            <h2 id="resultText">Résultat</h2>
-            <button class="btn" onclick="location.href='index.html'">Accueil</button>
-            <button class="btn" onclick="location.href='personnage.html'">Rejouer</button>
-        </div>
     </div>
 
     <script>
         const chars = {
-            "House of Laura": {hp: 200, skills:[{n:'Pause',d:15},{n:'Soutien',d:25},{n:'Hype',d:35},{n:'Combo',d:45},{n:'Raid',d:55},{n:'Ban',d:70},{n:'Mega',d:85}]},
-            "HOL Rozuya": {hp: 150, skills:[{n:'Code',d:10},{n:'Soin',d:20},{n:'Debug',d:30},{n:'Compile',d:35},{n:'Backup',d:45},{n:'Panic',d:55},{n:'Flash',d:65}]},
-            "HOL Tony": {hp: 280, skills:[{n:'Bloc',d:10},{n:'Cri',d:15},{n:'Tacle',d:25},{n:'Rush',d:35},{n:'Charge',d:45},{n:'Impact',d:55},{n:'Stun',d:60}]},
-            "HOL Omass": {hp: 180, skills:[{n:'Rush',d:20},{n:'Kick',d:30},{n:'Punch',d:40},{n:'Slam',d:50},{n:'Combo',d:60},{n:'Uppercut',d:70},{n:'Fury',d:85}]},
-            "K974YT": {hp: 130, skills:[{n:'Jump',d:25},{n:'Dash',d:35},{n:'Silent',d:45},{n:'Cut',d:55},{n:'Slash',d:70},{n:'Blade',d:85},{n:'Backstab',d:100}]},
-            "Dark MortelCygne": {hp: 160, skills:[{n:'Ombre',d:20},{n:'Plume',d:30},{n:'Griffe',d:40},{n:'Night',d:50},{n:'Black',d:65},{n:'Étreinte',d:80},{n:'Soul',d:90}]}
+            "House of Laura": {hp: 200, skills:[{n:'Hype',v:20,t:'dmg',cd:0},{n:'Pause Café',v:25,t:'heal',cd:2},{n:'Raid',v:40,t:'dmg',cd:2},{n:'Soutien',v:50,t:'heal',cd:3},{n:'Combo',v:60,t:'dmg',cd:2},{n:'Mega',v:80,t:'dmg',cd:4}]},
+            "HOL Rozuya": {hp: 150, skills:[{n:'Code',v:15,t:'dmg',cd:0},{n:'Soin',v:30,t:'heal',cd:2},{n:'Debug',v:25,t:'dmg',cd:1},{n:'Backup',v:40,t:'heal',cd:3},{n:'Panic',v:50,t:'dmg',cd:2},{n:'Flash',v:60,t:'dmg',cd:3}]},
+            "HOL Tony": {hp: 300, skills:[{n:'Bloc',v:10,t:'dmg',cd:0},{n:'Cri',v:15,t:'dmg',cd:1},{n:'Auto-Soin',v:30,t:'heal',cd:3},{n:'Rush',v:35,t:'dmg',cd:2},{n:'Charge',v:45,t:'dmg',cd:2},{n:'Impact',v:55,t:'dmg',cd:3}]},
+            "HOL Omass": {hp: 220, skills:[{n:'Rush',v:20,t:'dmg',cd:0},{n:'Kick',v:30,t:'dmg',cd:1},{n:'Punch',v:40,t:'dmg',cd:2},{n:'Slam',v:45,t:'dmg',cd:2},{n:'Combo',v:60,t:'dmg',cd:3},{n:'Fury',v:75,t:'dmg',cd:4}]},
+            "K974YT": {hp: 140, skills:[{n:'Jump',v:25,t:'dmg',cd:0},{n:'Dash',v:35,t:'dmg',cd:1},{n:'Silent',v:45,t:'dmg',cd:2},{n:'Cut',v:55,t:'dmg',cd:2},{n:'Slash',v:70,t:'dmg',cd:3},{n:'Backstab',v:90,t:'dmg',cd:4}]},
+            "Dark MortelCygne": {hp: 180, skills:[{n:'Ombre',v:20,t:'dmg',cd:0},{n:'Vampire',v:25,t:'heal',cd:2},{n:'Griffe',v:40,t:'dmg',cd:1},{n:'Night',v:50,t:'dmg',cd:2},{n:'Black',v:65,t:'dmg',cd:3},{n:'Soul',v:85,t:'dmg',cd:4}]}
         };
 
-        // Configuration
         let pName = localStorage.getItem('char') || "House of Laura";
         let diff = parseInt(localStorage.getItem('diff')) || 4;
-        const charNames = Object.keys(chars);
-        const eName = charNames.filter(n => n !== pName)[Math.floor(Math.random() * (charNames.length - 1))];
+        const eName = Object.keys(chars).filter(n => n !== pName)[0];
 
-        // RÈGLE SYMÉTRIQUE : On trie les compétences par dégâts pour tout le monde
-        let pS = [...chars[pName].skills].sort((a,b) => a.d - b.d).slice(0, diff);
-        let eS = [...chars[eName].skills].sort((a,b) => a.d - b.d).slice(0, diff);
+        // Initialisation avec état de cooldown
+        let pS = chars[pName].skills.slice(0, diff).map(s => ({...s, cdActuel: 0}));
+        let eS = chars[eName].skills.slice(0, diff).map(s => ({...s, cdActuel: 0}));
 
         let pHP = chars[pName].hp, eHP = chars[eName].hp;
         let isPlayerTurn = true;
 
-        function getActualDamage(baseDmg) {
-            let varDmg = Math.floor(baseDmg * 0.15);
-            return baseDmg + (Math.floor(Math.random() * (varDmg * 2 + 1)) - varDmg);
-        }
-
         function updateUI() {
-            document.getElementById('p-name').innerText = pName;
-            document.getElementById('e-name').innerText = eName;
             document.getElementById('p-hp').innerText = `${Math.max(0, pHP)}/${chars[pName].hp}`;
             document.getElementById('e-hp').innerText = `${Math.max(0, eHP)}/${chars[eName].hp}`;
             document.getElementById('p-bar').style.width = (Math.max(0, pHP) / chars[pName].hp * 100) + "%";
             document.getElementById('e-bar').style.width = (Math.max(0, eHP) / chars[eName].hp * 100) + "%";
+            renderButtons();
         }
 
-        // Génération boutons joueur
-        pS.forEach((s, i) => {
-            let b = document.createElement('button');
-            b.className = 'btn';
-            b.style.margin = "0"; b.style.padding = "15px 5px";
-            b.innerHTML = `<strong>${s.n}</strong><br><small>~${s.d} Dmg</small>`;
-            b.onclick = () => play(i);
-            document.getElementById('actions').appendChild(b);
-        });
+        function renderButtons() {
+            const container = document.getElementById('actions');
+            container.innerHTML = '';
+            pS.forEach((s, i) => {
+                let b = document.createElement('button');
+                b.className = 'btn';
+                b.style.display = "flex"; b.style.flexDirection = "column"; b.style.alignItems = "center";
+                
+                if(s.cdActuel > 0) {
+                    b.style.opacity = "0.5";
+                    b.innerHTML = `<strong>${s.n}</strong><small>CD: ${s.cdActuel}</small>`;
+                    b.disabled = true;
+                } else {
+                    b.innerHTML = `<strong>${s.n}</strong><small>${s.t === 'heal' ? '+' : ''}${s.v} ${s.t}</small>`;
+                    b.onclick = () => play(i);
+                }
+                container.appendChild(b);
+            });
+        }
 
         function play(i) {
-            if(!isPlayerTurn) return;
-            let dmg = getActualDamage(pS[i].d);
-            eHP -= dmg;
-            document.getElementById('log').innerText = `Tu as fait -${dmg} PV avec ${pS[i].n} !`;
+            if(!isPlayerTurn || pS[i].cdActuel > 0) return;
+            
+            // Action
+            if(pS[i].t === 'dmg') eHP -= pS[i].v;
+            else pHP = Math.min(chars[pName].hp, pHP + pS[i].v);
+            
+            // Lancer CD
+            pS[i].cdActuel = pS[i].cd;
+            
+            document.getElementById('log').innerText = `Utilisé : ${pS[i].n} !`;
             updateUI();
-            if(eHP <= 0) endGame("Victoire ! 🎉");
-            else { isPlayerTurn = false; setTimeout(aiTurn, 1000); }
+            
+            if(eHP <= 0) alert("Victoire !");
+            else { 
+                isPlayerTurn = false; 
+                setTimeout(aiTurn, 1000); 
+            }
         }
 
         function aiTurn() {
-            // IA INTELLIGENTE : Elle choisit ses meilleures attaques selon la diff
-            let s;
-            if (diff === 2) s = eS[Math.floor(Math.random() * 2)];
-            else if (diff === 4) s = eS[Math.floor(Math.random() * 4)];
-            else if (diff === 6) s = eS[Math.floor(Math.random() * 6)];
-            else s = eS[Math.floor(Math.random() * 3) + 4]; // Expert : privilégie le haut du panier
+            // Decrementer CD Joueur avant tour IA
+            pS.forEach(s => { if(s.cdActuel > 0) s.cdActuel--; });
             
-            let dmg = getActualDamage(s.d);
-            pHP -= dmg;
-            document.getElementById('log').innerText = `${eName} riposte : -${dmg} PV (${s.n}) !`;
-            updateUI();
-            if(pHP <= 0) endGame("Défaite... 💀");
-            else isPlayerTurn = true;
-        }
+            // IA joue
+            let dispo = eS.filter(s => s.cdActuel === 0);
+            let s = dispo[Math.floor(Math.random() * dispo.length)];
+            
+            if(s) {
+                if(s.t === 'dmg') pHP -= s.v;
+                else eHP = Math.min(chars[eName].hp, eHP + s.v);
+                s.cdActuel = s.cd;
+                document.getElementById('log').innerText = `${eName} a utilisé ${s.n} !`;
+            }
 
-        function endGame(msg) {
-            document.getElementById('resultText').innerText = msg;
-            document.getElementById('endModal').style.display = 'flex';
+            // Decrementer CD IA
+            eS.forEach(sk => { if(sk.cdActuel > 0) sk.cdActuel--; });
+            
+            isPlayerTurn = true;
+            updateUI();
         }
 
         updateUI();
