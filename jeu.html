@@ -3,64 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arène de Combat</title>
+    <title>Combat HOL</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="container">
-        <!-- En-tête : Noms et PV -->
-        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-            <strong id="p-name"></strong>
-            <strong id="e-name"></strong>
-        </div>
+    <div class="container" style="max-width: 600px;">
         
-        <div style="display: flex; gap: 10px;">
-            <div class="health-bar"><div id="p-bar" class="bar"></div></div>
-            <div class="health-bar"><div id="e-bar" class="bar" style="background:#ff4646"></div></div>
-        </div>
-        
-        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-            <span id="p-hp"></span>
-            <span id="e-hp"></span>
+        <!-- Haut de l'arène : Noms, Barres et PV -->
+        <div style="display: flex; gap: 20px; margin-bottom: 30px;">
+            <div style="flex: 1; text-align: center;">
+                <div id="p-name" style="font-weight: bold; font-size: 1.1rem; margin-bottom: 10px;"></div>
+                <div class="health-bar"><div id="p-bar" class="bar"></div></div>
+                <div id="p-hp" style="margin-top: 8px; font-size: 0.95rem; color: #ddd;"></div>
+            </div>
+
+            <div style="flex: 1; text-align: center;">
+                <div id="e-name" style="font-weight: bold; font-size: 1.1rem; margin-bottom: 10px;"></div>
+                <div class="health-bar"><div id="e-bar" class="bar" style="background: #ff4646;"></div></div>
+                <div id="e-hp" style="margin-top: 8px; font-size: 0.95rem; color: #ddd;"></div>
+            </div>
         </div>
 
-        <h2 id="log" style="font-size: 1.1rem; color: #9146ff; margin: 15px 0;">Que le combat commence !</h2>
+        <!-- Texte central -->
+        <h2 id="log" style="font-size: 1.1rem; margin: 25px 0; text-align: center;">Que le combat commence !</h2>
 
         <!-- Grille des compétences (2x2) -->
-        <div id="actions" class="roster" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"></div>
+        <div id="actions" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;"></div>
+
+    </div>
+
+    <!-- Pop-up de fin -->
+    <div id="endModal" class="modal">
+        <div class="modal-content" style="text-align: center;">
+            <h2 id="resultText">Résultat</h2>
+            <button class="btn" onclick="location.href='index.html'">Accueil</button>
+            <button class="btn" onclick="location.href='personnage.html'">Rejouer</button>
+        </div>
     </div>
 
     <script>
-        // --- TA LOGIQUE DE DONNÉES (Gardée intacte) ---
         const chars = {
             "House of Laura": {hp:260, skills:[{n:'Pause',d:10},{n:'Soutien',d:20},{n:'Hype',d:40},{n:'Combo',d:50},{n:'Raid',d:60},{n:'Ban',d:80},{n:'Mega',d:90}]},
-            // ... (tes autres persos)
+            "HOL Rozuya": {hp:230, skills:[{n:'Code',d:20},{n:'Soin',d:25},{n:'Debug',d:30},{n:'Compile',d:30},{n:'Backup',d:40},{n:'Panic',d:50},{n:'Flash',d:60}]},
+            "HOL Tony": {hp:300, skills:[{n:'Bloc',d:10},{n:'Cri',d:20},{n:'Tacle',d:30},{n:'Rush',d:40},{n:'Charge',d:50},{n:'Impact',d:55},{n:'Stun',d:20}]},
+            "HOL Omass": {hp:250, skills:[{n:'Rush',d:20},{n:'Kick',d:30},{n:'Punch',d:40},{n:'Slam',d:45},{n:'Combo',d:50},{n:'Uppercut',d:60},{n:'Fury',d:70}]},
+            "K974YT": {hp:200, skills:[{n:'Jump',d:20},{n:'Dash',d:25},{n:'Silent',d:30},{n:'Cut',d:40},{n:'Slash',d:50},{n:'Blade',d:65},{n:'Backstab',d:70}]},
+            "Dark MortelCygne": {hp:220, skills:[{n:'Ombre',d:25},{n:'Plume',d:30},{n:'Griffe',d:40},{n:'Night',d:50},{n:'Black',d:60},{n:'Étreinte',d:80},{n:'Soul',d:90}]}
         };
 
-        const pName = localStorage.getItem('char');
-        const diff = parseInt(localStorage.getItem('diff'));
-        // ... (ton code pour choisir l'adversaire et les skills ici)
+        const pName = localStorage.getItem('char') || "House of Laura";
+        const diff = parseInt(localStorage.getItem('diff')) || 4;
+        
+        const charNames = Object.keys(chars);
+        const eName = charNames.filter(n => n !== pName)[Math.floor(Math.random() * (charNames.length - 1))];
+        
+        let pMax = chars[pName].hp, eMax = chars[eName].hp;
+        let pHP = pMax, eHP = eMax;
+        
+        let pS = chars[pName].skills.slice(0, diff);
+        let eS = chars[eName].skills.slice(0, diff);
+        let isPlayerTurn = true;
 
-        // --- MISE À JOUR VISUELLE ---
         function updateUI() {
             document.getElementById('p-name').innerText = pName;
             document.getElementById('e-name').innerText = eName;
-            document.getElementById('p-hp').innerText = `${pHP}/${chars[pName].hp}`;
-            document.getElementById('e-hp').innerText = `${eHP}/${chars[eName].hp}`;
-            document.getElementById('p-bar').style.width = (pHP / chars[pName].hp * 100) + "%";
-            document.getElementById('e-bar').style.width = (eHP / chars[eName].hp * 100) + "%";
+            document.getElementById('p-hp').innerText = `${pHP}/${pMax}`;
+            document.getElementById('e-hp').innerText = `${eHP}/${eMax}`;
+            document.getElementById('p-bar').style.width = (pHP / pMax * 100) + "%";
+            document.getElementById('e-bar').style.width = (eHP / eMax * 100) + "%";
         }
 
-        // --- AFFICHAGE BOUTONS (Grille) ---
         pS.forEach((s, i) => {
             let b = document.createElement('button');
             b.className = 'btn';
-            b.style.margin = "0"; // Pour que le grid s'occupe de l'espacement
-            b.innerHTML = `<strong>${s.n}</strong><br><small>${s.d} Dmg</small>`;
+            b.style.margin = "0"; 
+            b.style.padding = "15px 5px";
+            b.innerHTML = `<strong>${s.n}</strong><br><small style="color:#aaa;">${s.d} Dmg</small>`;
             b.onclick = () => play(i);
             document.getElementById('actions').appendChild(b);
         });
+
+        function play(i) {
+            if(!isPlayerTurn) return;
+            eHP = Math.max(0, eHP - pS[i].d);
+            document.getElementById('log').innerText = `Tu as utilisé ${pS[i].n} !`;
+            document.getElementById('log').style.color = "#fff";
+            updateUI();
+            
+            if(eHP <= 0) setTimeout(() => endGame("Victoire ! 🎉"), 500);
+            else {
+                isPlayerTurn = false;
+                setTimeout(aiTurn, 1000);
+            }
+        }
+
+        function aiTurn() {
+            let sorted = [...eS].sort((a,b) => a.d - b.d);
+            let s = (diff==2) ? sorted[0] : (diff==4) ? sorted[1] : (diff==6) ? sorted[sorted.length-2] : sorted[sorted.length-1];
+            
+            pHP = Math.max(0, pHP - s.d);
+            document.getElementById('log').innerText = `${eName} riposte avec ${s.n} !`;
+            document.getElementById('log').style.color = "#ff4646";
+            updateUI();
+            
+            if(pHP <= 0) setTimeout(() => endGame("Défaite... 💀"), 500);
+            else isPlayerTurn = true;
+        }
+
+        function endGame(msg) {
+            document.getElementById('resultText').innerText = msg;
+            document.getElementById('endModal').style.display = 'flex';
+        }
+
+        updateUI();
     </script>
 </body>
 </html>
