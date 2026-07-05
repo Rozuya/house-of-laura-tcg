@@ -20,7 +20,11 @@
         #actions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 20px; }
         .btn { padding: 15px 10px; background: #2a2a2a; border: 1px solid #444; color: white; cursor: pointer; border-radius: 10px; transition: 0.2s; font-size: 0.95rem; user-select: none; -webkit-tap-highlight-color: transparent; }
         .btn:hover:not(:disabled) { background: #3a3a3a; border-color: #9146ff; }
-        .btn:disabled { opacity: 0.4; cursor: not-allowed; border: 1px solid #222; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; border: 1px solid #555; background: #1a1a1a; }
+        /* Style spécial pour le texte de CD */
+        .cd-text { display: block; margin-top: 4px; font-size: 0.8rem; font-weight: bold; }
+        .ready { color: #4caf50; }
+        .waiting { color: #ff9800; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; z-index: 100; }
         .modal-box { background: #1e1e1e; padding: 30px; border-radius: 15px; border: 2px solid #9146ff; text-align: center; width: 90%; max-width: 400px; }
         .modal-btns { margin-top: 20px; display: flex; gap: 10px; justify-content: center; }
@@ -65,12 +69,9 @@
             "Dark MortelCygne": {hp: 190, skills: [{n:'Ombre',v:20,t:'dmg',cd:0}, {n:'Vampire',v:40,t:'heal',cd:3}, {n:'Griffe',v:45,t:'dmg',cd:1}, {n:'Night',v:50,t:'dmg',cd:2}, {n:'Black',v:60,t:'dmg',cd:2}, {n:'Étreinte',v:75,t:'dmg',cd:3}, {n:'Soul',v:100,t:'dmg',cd:5}]}
         };
 
-        // --- RÉCUPÉRATION CORRIGÉE ET SIMPLIFIÉE ---
         let pName = localStorage.getItem('char') || "House of Laura";
-        let rawDiff = localStorage.getItem('diff') || "2"; // Chiffres envoyés depuis difficulte.html
+        let rawDiff = localStorage.getItem('diff') || "2"; 
         let numSkills = parseInt(rawDiff); 
-
-        // Détermination du niveau d'IA (1=Facile, 2=Normal, 3=Difficile, 4=Expert)
         let diffLevel = (numSkills === 2) ? 1 : (numSkills === 4) ? 2 : (numSkills === 6) ? 3 : 4;
 
         const eName = Object.keys(chars).filter(n => n !== pName)[0];
@@ -97,7 +98,11 @@
                 let b = document.createElement('button');
                 b.className = 'btn';
                 b.disabled = !isPlayerTurn || s.cdActuel > 0;
-                b.innerHTML = `<strong>${s.n}</strong><br><small>${s.t=='dmg'?s.v+' dmg':s.v+' heal'} ${s.cdActuel>0?'(CD:'+s.cdActuel+')':''}</small>`;
+                
+                // Nouveau formatage : Valeur + Statut CD explicite
+                let cdLabel = s.cdActuel > 0 ? `<span class="cd-text waiting">CD: ${s.cdActuel}</span>` : `<span class="cd-text ready">PRÊT</span>`;
+                
+                b.innerHTML = `<strong>${s.n}</strong><br><small>${s.t=='dmg'?s.v+' dmg':s.v+' heal'}</small>${cdLabel}`;
                 b.onclick = () => playerMove(i);
                 container.appendChild(b);
             });
