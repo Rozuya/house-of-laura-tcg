@@ -15,8 +15,6 @@
         #actions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
         .btn { padding: 15px; background: #2a2a2a; border: 1px solid #444; color: white; cursor: pointer; border-radius: 10px; }
         .btn:disabled { opacity: 0.5; }
-        
-        /* Modale pour victoire/défaite */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; }
     </style>
 </head>
@@ -36,7 +34,7 @@
             <div class="player-status"><div id="p-name"></div><div class="bar-bg"><div id="p-bar" class="bar"></div></div><div id="p-hp"></div></div>
             <div class="player-status"><div id="e-name"></div><div class="bar-bg"><div id="e-bar" class="bar"></div></div><div id="e-hp"></div></div>
         </div>
-        <h2 id="log" style="text-align:center">À toi de jouer !</h2>
+        <h2 id="turn-text" style="text-align:center">Chargement...</h2>
         <div id="actions"></div>
     </div>
 
@@ -64,6 +62,8 @@
         let pHP = chars[pName].hp, eHP = chars[eName].hp;
         let isPlayerTurn = true;
 
+        function updateTurnText(text) { document.getElementById('turn-text').innerText = text; }
+
         function updateUI() {
             document.getElementById('p-name').innerText = pName;
             document.getElementById('e-name').innerText = eName;
@@ -71,6 +71,9 @@
             document.getElementById('e-hp').innerText = `${Math.max(0, eHP)} / ${chars[eName].hp}`;
             document.getElementById('p-bar').style.width = (Math.max(0, pHP)/chars[pName].hp*100) + "%";
             document.getElementById('e-bar').style.width = (Math.max(0, eHP)/chars[eName].hp*100) + "%";
+            
+            if(isPlayerTurn) updateTurnText(`À ${pName} de jouer !`);
+            
             const container = document.getElementById('actions');
             container.innerHTML = '';
             pS.forEach((s, i) => {
@@ -79,9 +82,10 @@
                 b.disabled = !isPlayerTurn || s.cdActuel > 0;
                 b.innerHTML = `<strong>${s.n}</strong><br>${s.v} ${s.t}<br>${s.cdActuel>0 ? 'CD:'+s.cdActuel : 'PRÊT'}`;
                 b.onclick = () => {
+                    updateTurnText(`${pName} utilise ${s.n} !`);
                     if(s.t==='dmg') eHP -= s.v; else pHP = Math.min(chars[pName].hp, pHP + s.v);
-                    s.cdActuel = s.cd; isPlayerTurn = false; updateUI();
-                    if(eHP <= 0) endGame(true); else setTimeout(aiTurn, 800);
+                    s.cdActuel = s.cd; isPlayerTurn = false;
+                    setTimeout(() => { updateUI(); if(eHP <= 0) endGame(true); else aiTurn(); }, 1200);
                 };
                 container.appendChild(b);
             });
@@ -90,36 +94,29 @@
         function aiTurn() {
             pS.forEach(s => { if(s.cdActuel > 0) s.cdActuel--; });
             eS.forEach(s => { if(s.cdActuel > 0) s.cdActuel--; });
-
             let moves = eS.filter(s => s.cdActuel === 0);
             let move = null;
-
             if (moves.length > 0) {
-                if (diff === 1) { 
-                    // Facile : Aléatoire
-                    move = moves[Math.floor(Math.random() * moves.length)];
-                } else if (diff === 2) { 
-                    // Normal : Soin si PV < 50%
-                    let heal = moves.find(s => s.t === 'heal');
-                    move = (eHP < (chars[eName].hp * 0.5) && heal) ? heal : moves.sort((a,b) => b.v - a.v)[0];
-                } else { 
-                    // Difficile/Expert : Optimisation maximale
-                    move = moves.sort((a,b) => b.v - a.v)[0];
-                }
+                if (diff === 1) { move = moves[Math.floor(Math.random() * moves.length)]; }
+                else if (diff === 2) { let heal = moves.find(s => s.t === 'heal'); move = (eHP < (chars[eName].hp * 0.5) && heal) ? heal : moves.sort((a,b) => b.v - a.v)[0]; }
+                else { move = moves.sort((a,b) => b.v - a.v)[0]; }
             }
-
             if(move) {
-                if(move.t === 'dmg') pHP -= move.v; else eHP = Math.min(chars[eName].hp, eHP + move.v);
-                move.cdActuel = move.cd;
-            }
-            isPlayerTurn = true; updateUI();
-            if(pHP <= 0) endGame(false);
+                updateTurnText(`${eName} utilise ${move.n} !`);
+                setTimeout(() => {
+                    if(move.t === 'dmg') pHP -= move.v; else eHP = Math.min(chars[eName].hp, eHP + move.v);
+                    move.cdActuel = move.cd;
+                    isPlayerTurn = true; updateUI();
+                    if(pHP <= 0) endGame(false);
+                }, 1200);
+            } else { isPlayerTurn = true; updateUI(); }
         }
 
         function endGame(win) {
             document.getElementById('endModal').style.display = 'flex';
             document.getElementById('modal-title').innerText = win ? "VICTOIRE !" : "DÉFAITE...";
             document.getElementById('actions').style.display = 'none';
+            updateTurnText("Combat terminé !");
         }
         updateUI();
     </script>
