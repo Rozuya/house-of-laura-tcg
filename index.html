@@ -2,36 +2,49 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>HOL BATTLE GAME</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: sans-serif; background: #121212; color: #fff; margin: 0; padding: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; }
+        h1 { margin-bottom: 40px; color: #9146ff; }
+        .menu-btn { width: 100%; max-width: 350px; padding: 20px; margin: 10px 0; background: #2a2a2a; border: 2px solid #444; color: white; font-size: 1.2rem; cursor: pointer; border-radius: 10px; transition: 0.3s; }
+        .menu-btn:hover { border-color: #9146ff; background: #333; }
+        
+        /* Modal Styles */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+        .modal-content { background: #1a1a1a; padding: 25px; border-radius: 15px; border: 2px solid #9146ff; max-width: 500px; width: 100%; position: relative; }
+        .close-btn { position: absolute; top: 10px; right: 15px; font-size: 1.5rem; cursor: pointer; color: white; }
+    </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>HOL BATTLE GAME</h1>
-        <button class="btn" onclick="location.href='difficulte.html'">Jouer</button>
-        <button class="btn" id="btnRules" style="background: #9146ff;">Règles & Actus</button>
-    </div>
+    <h1>HOL BATTLE GAME</h1>
 
-    <!-- Pop-up Règles -->
-    <div id="rulesModal" class="modal">
+    <button class="menu-btn" onclick="location.href='difficulte.html'">Jouer</button>
+    <button class="menu-btn" onclick="openModal()">Règles & Actus</button>
+
+    <!-- Modal Règles & Actus -->
+    <div id="infoModal" class="modal">
         <div class="modal-content">
-            <span id="closeModal" style="float:right; cursor:pointer; font-size: 24px;">&times;</span>
-            <h2>📜 Règles & Actualités</h2>
-            <p style="margin-bottom: 10px;"><b>Comment jouer :</b> Choisis ta difficulté, ton héros, et affronte l'IA.</p>
-            <p style="margin-bottom: 10px;">• <b>Héros Uniques :</b> Chaque personnage de la House possède ses propres compétences personnalisées !</p>
-            <p style="margin-bottom: 10px;">• <b>Système :</b> Tes compétences font des dégâts variés. Gère-les bien !</p>
-            <p style="margin-bottom: 15px;">• <b>Compétences débloquées :</b> Facile : 2 | Normal : 4 | Difficile : 6 | Expert : 7</p>
-            <p style="color: #00ff00; font-weight: bold; text-align: center;">🔥 À venir : Mode Boss Battle (15 niveaux) !</p>
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h2 style="color: #9146ff;">📜 Règles & Actualités</h2>
+            <p><strong>Comment jouer :</strong> Choisis ta difficulté, ton héros, et affronte l'IA (le système t'empêchera toujours de tomber sur ton propre clone !).</p>
+            <p>• <strong>Compétences débloquées :</strong> Facile : 2 | Normal : 4 | Difficile : 6 | Expert : 7.</p>
+            <p>• <strong>Système Anti-Spam :</strong> Le bug du double-clic est corrigé ! Les boutons se verrouillent pendant les attaques pour un combat au tour par tour strict.</p>
+            <p>• <strong>Équilibrage Global :</strong> Les stats ont été ajustées (Soin du Vampire limité, Tank ralenti, Soutien plus résistant). Le mode Expert reste un défi ultime mais <strong>100% gagnable</strong> peu importe ton héros !</p>
+            <p style="color: #00ff00;">🔥 À venir : Mode Boss Battle (15 niveaux) !</p>
         </div>
     </div>
 
     <script>
-        const modal = document.getElementById("rulesModal");
-        document.getElementById("btnRules").onclick = () => modal.style.display = "flex";
-        document.getElementById("closeModal").onclick = () => modal.style.display = "none";
-        window.onclick = (e) => { if (e.target == modal) modal.style.display = "none"; };
+        function openModal() { document.getElementById('infoModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('infoModal').style.display = 'none'; }
+        // Fermer le modal en cliquant en dehors
+        window.onclick = function(event) {
+            let modal = document.getElementById('infoModal');
+            if (event.target == modal) { closeModal(); }
+        }
     </script>
 </body>
 </html>
