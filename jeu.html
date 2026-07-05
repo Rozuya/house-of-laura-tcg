@@ -39,25 +39,21 @@
     </div>
 
     <script>
-        // EQUILIBRAGE GLOBAL ACCESSIBLE POUR TOUS LES PERSOS
         const chars = {
-            "House of Laura": {hp: 210, skills: [{n:'Chat Spam',v:25,t:'dmg',cd:0}, {n:'BRB',v:40,t:'heal',cd:0}, {n:'Sub Gift',v:45,t:'heal',cd:1}, {n:'Host Raid',v:50,t:'dmg',cd:2}, {n:'Donation',v:65,t:'dmg',cd:2}, {n:'Stream Event',v:90,t:'dmg',cd:3}, {n:'Partner Prime',v:125,t:'dmg',cd:5}]},
-            "HOL Rozuya": {hp: 200, skills: [{n:'Code',v:16,t:'dmg',cd:0}, {n:'Soin',v:45,t:'heal',cd:0}, {n:'Debug',v:35,t:'dmg',cd:1}, {n:'Panic',v:55,t:'dmg',cd:1}, {n:'Backup',v:75,t:'heal',cd:2}, {n:'Flash',v:80,t:'dmg',cd:3}, {n:'System',v:125,t:'dmg',cd:5}]},
-            "HOL Tony": {hp: 260, skills: [{n:'Bloc',v:12,t:'dmg',cd:0}, {n:'Cri',v:16,t:'dmg',cd:0}, {n:'Soin',v:35,t:'heal',cd:2}, {n:'Rush',v:30,t:'dmg',cd:1}, {n:'Charge',v:45,t:'dmg',cd:3}, {n:'Impact',v:60,t:'dmg',cd:4}, {n:'Mur',v:80,t:'dmg',cd:6}]},
-            "HOL Omass": {hp: 175, skills: [{n:'Rush',v:24,t:'dmg',cd:0}, {n:'Flex',v:20,t:'heal',cd:0}, {n:'Punch',v:38,t:'dmg',cd:1}, {n:'Slam',v:48,t:'dmg',cd:1}, {n:'Combo',v:60,t:'dmg',cd:2}, {n:'Uppercut',v:85,t:'dmg',cd:3}, {n:'Fury',v:120,t:'dmg',cd:4}]},
-            "K974YT": {hp: 160, skills: [{n:'Jump',v:18,t:'dmg',cd:0}, {n:'Dash',v:30,t:'dmg',cd:0}, {n:'Silent',v:45,t:'dmg',cd:1}, {n:'Cut',v:40,t:'heal',cd:1}, {n:'Slash',v:65,t:'dmg',cd:2}, {n:'Blade',v:90,t:'dmg',cd:3}, {n:'Backstab',v:130,t:'dmg',cd:5}]},
-            "Dark MortelCygne": {hp: 205, skills: [{n:'Ombre',v:20,t:'dmg',cd:0}, {n:'Vampire',v:35,t:'heal',cd:1}, {n:'Griffe',v:45,t:'dmg',cd:1}, {n:'Night',v:50,t:'dmg',cd:1}, {n:'Black',v:65,t:'dmg',cd:2}, {n:'Étreinte',v:80,t:'dmg',cd:3}, {n:'Soul',v:115,t:'dmg',cd:5}]}
+            "House of Laura": {hp: 220, skills: [{n:'Chat Spam',v:25,t:'dmg',cd:0}, {n:'BRB',v:40,t:'heal',cd:2}, {n:'Sub Gift',v:50,t:'heal',cd:3}, {n:'Host Raid',v:45,t:'dmg',cd:1}, {n:'Donation',v:60,t:'dmg',cd:2}, {n:'Stream Event',v:90,t:'dmg',cd:3}, {n:'Partner Prime',v:125,t:'dmg',cd:5}]},
+            "HOL Rozuya": {hp: 215, skills: [{n:'Code',v:25,t:'dmg',cd:0}, {n:'Soin',v:45,t:'heal',cd:2}, {n:'Debug',v:40,t:'dmg',cd:1}, {n:'Panic',v:55,t:'dmg',cd:2}, {n:'Backup',v:70,t:'heal',cd:4}, {n:'Flash',v:80,t:'dmg',cd:3}, {n:'System',v:115,t:'dmg',cd:5}]},
+            "HOL Tony": {hp: 260, skills: [{n:'Bloc',v:22,t:'dmg',cd:0}, {n:'Soin',v:40,t:'heal',cd:2}, {n:'Cri',v:35,t:'dmg',cd:1}, {n:'Rush',v:45,t:'dmg',cd:2}, {n:'Charge',v:60,t:'dmg',cd:3}, {n:'Impact',v:75,t:'dmg',cd:4}, {n:'Mur',v:90,t:'dmg',cd:5}]},
+            "HOL Omass": {hp: 200, skills: [{n:'Rush',v:30,t:'dmg',cd:0}, {n:'Flex',v:35,t:'heal',cd:2}, {n:'Punch',v:45,t:'dmg',cd:1}, {n:'Slam',v:60,t:'dmg',cd:2}, {n:'Combo',v:75,t:'dmg',cd:3}, {n:'Uppercut',v:95,t:'dmg',cd:4}, {n:'Fury',v:130,t:'dmg',cd:5}]},
+            "K974YT": {hp: 190, skills: [{n:'Jump',v:35,t:'dmg',cd:0}, {n:'Cut',v:35,t:'heal',cd:2}, {n:'Dash',v:45,t:'dmg',cd:1}, {n:'Silent',v:65,t:'dmg',cd:2}, {n:'Slash',v:80,t:'dmg',cd:3}, {n:'Blade',v:100,t:'dmg',cd:4}, {n:'Backstab',v:140,t:'dmg',cd:5}]},
+            "Dark MortelCygne": {hp: 210, skills: [{n:'Ombre',v:25,t:'dmg',cd:0}, {n:'Vampire',v:40,t:'heal',cd:2}, {n:'Griffe',v:45,t:'dmg',cd:1}, {n:'Night',v:55,t:'dmg',cd:2}, {n:'Black',v:70,t:'dmg',cd:2}, {n:'Étreinte',v:85,t:'dmg',cd:3}, {n:'Soul',v:115,t:'dmg',cd:5}]}
         };
 
         let pName = localStorage.getItem('char') || "House of Laura";
         let diff = parseInt(localStorage.getItem('diff')) || 1; 
         let numSkills = [2, 4, 6, 7][diff - 1] || 2;
+        let enemyHpMultiplier = [1.0, 1.10, 1.20, 1.30][diff - 1] || 1.0;
+        let enemyAtkMultiplier = [1.0, 1.05, 1.10, 1.20][diff - 1] || 1.0;
         
-        // CORRECTION DE L'IA : Multiplicateurs dosés pour garder l'Expert gagnable
-        let enemyHpMultiplier = [1.0, 1.15, 1.30, 1.45][diff - 1] || 1.0;
-        let enemyAtkMultiplier = [1.0, 1.10, 1.20, 1.35][diff - 1] || 1.0;
-        
-        // MECANIQUE ANTI-CLONE : Filtrage strict pour ne jamais tomber sur soi-même
         const allNames = Object.keys(chars);
         const possibleEnemies = allNames.filter(n => n !== pName);
         let eName = possibleEnemies[Math.floor(Math.random() * possibleEnemies.length)];
@@ -70,7 +66,7 @@
         let eHP = eMaxHP;
         
         let isPlayerTurn = true;
-        let actionEnCours = false; // Le fameux verrou anti double-clic
+        let actionEnCours = false;
 
         function updateTurnText(text) { document.getElementById('turn-text').innerText = text; }
 
@@ -86,27 +82,22 @@
             
             const container = document.getElementById('actions');
             container.innerHTML = '';
-            pS.forEach((s, i) => {
+            pS.forEach((s) => {
                 let b = document.createElement('button');
                 b.className = 'btn';
-                b.disabled = !isPlayerTurn || actionEnCours || s.cdActuel > 0;
-                b.innerHTML = `<strong>${s.n}</strong><br>${s.v} ${s.t}<br>${s.cdActuel>0 ? 'CD : '+s.cdActuel : 'PRÊT'}`;
+                let estPret = (s.cdActuel === 0);
+                b.disabled = !isPlayerTurn || actionEnCours || !estPret;
+                b.innerHTML = `<strong>${s.n}</strong><br>${s.v} ${s.t}<br>
+                               <span style="color: ${estPret ? '#00ff00' : '#ff4444'}; font-weight: bold;">
+                                   ${estPret ? 'PRÊT' : 'CD : ' + s.cdActuel}</span>`;
                 b.onclick = () => {
                     if(!isPlayerTurn || actionEnCours || s.cdActuel > 0) return;
-                    actionEnCours = true; // On verrouille l'action immédiatement
-                    
-                    const allBtns = container.querySelectorAll('.btn');
-                    allBtns.forEach(btn => btn.disabled = true);
-
+                    actionEnCours = true;
                     updateTurnText(`${pName} utilise ${s.n} !`);
                     if(s.t==='dmg') eHP -= s.v; else pHP = Math.min(chars[pName].hp, pHP + s.v);
-                    s.cdActuel = s.cd + 1; 
+                    s.cdActuel = s.cd + 1;
                     isPlayerTurn = false;
-                    
-                    setTimeout(() => { 
-                        updateUI(); 
-                        if(eHP <= 0) endGame(true); else aiTurn(); 
-                    }, 1200);
+                    setTimeout(() => { updateUI(); if(eHP <= 0) endGame(true); else aiTurn(); }, 1200);
                 };
                 container.appendChild(b);
             });
@@ -114,49 +105,24 @@
 
         function aiTurn() {
             let moves = eS.filter(s => s.cdActuel === 0);
-            let move = null;
-            if (moves.length > 0) {
-                if (diff === 1) { 
-                    move = moves[Math.floor(Math.random() * moves.length)]; 
-                } else { 
-                    let heal = moves.find(s => s.t === 'heal'); 
-                    move = (eHP < (eMaxHP * 0.4) && heal) ? heal : moves.sort((a,b) => b.v - a.v)[0]; 
-                }
-            }
-            if(move) {
-                updateTurnText(`${eName} utilise ${move.n} !`);
-                setTimeout(() => {
-                    if(move.t === 'dmg') {
-                        let finalDmg = Math.round(move.v * enemyAtkMultiplier);
-                        pHP -= finalDmg;
-                    } else { 
-                        eHP = Math.min(eMaxHP, eHP + move.v); 
-                    }
-                    move.cdActuel = move.cd + 1;
-                    
-                    // SYNCHRONISATION DES COOLDOWNS : Réduction uniquement en fin de tour complet
-                    pS.forEach(s => { if(s.cdActuel > 0) s.cdActuel--; });
-                    eS.forEach(s => { if(s.cdActuel > 0) s.cdActuel--; });
-                    
-                    isPlayerTurn = true; 
-                    actionEnCours = false; // On libère le verrou pour le joueur
-                    updateUI();
-                    if(pHP <= 0) endGame(false);
-                }, 1200);
-            } else { 
+            let move = (diff === 1) ? moves[Math.floor(Math.random() * moves.length)] : 
+                       (eHP < (eMaxHP * 0.4) && moves.find(s => s.t === 'heal')) ? moves.find(s => s.t === 'heal') : moves.sort((a,b) => b.v - a.v)[0];
+            
+            updateTurnText(`${eName} utilise ${move.n} !`);
+            setTimeout(() => {
+                if(move.t === 'dmg') pHP -= Math.round(move.v * enemyAtkMultiplier); else eHP = Math.min(eMaxHP, eHP + move.v);
+                move.cdActuel = move.cd + 1;
                 pS.forEach(s => { if(s.cdActuel > 0) s.cdActuel--; });
                 eS.forEach(s => { if(s.cdActuel > 0) s.cdActuel--; });
-                isPlayerTurn = true; 
-                actionEnCours = false;
-                updateUI(); 
-            }
+                isPlayerTurn = true; actionEnCours = false; updateUI();
+                if(pHP <= 0) endGame(false);
+            }, 1200);
         }
 
         function endGame(win) {
             document.getElementById('endModal').style.display = 'flex';
             document.getElementById('modal-title').innerText = win ? "VICTOIRE !" : "DÉFAITE...";
             document.getElementById('actions').style.display = 'none';
-            updateTurnText("Combat terminé !");
         }
         updateUI();
     </script>
